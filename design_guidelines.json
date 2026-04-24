@@ -1,90 +1,120 @@
 {
+  "project_name": "Moneto",
   "theme": "dark",
-  "archetype": "Swiss Luxury Fintech (Mix of Archetype 4 and 5)",
-  "core_concept": "Dark Fintech with an editorial edge. Combining hyper-modern stark layouts with 'Instrument Serif' for a premium, institutional feel contrasting with vibrant 'Acid Green' accents.",
-  "colors": {
-    "background": "#050505",
-    "surface": "#121215",
-    "surface_hover": "#18181B",
-    "border": "#27272A",
-    "border_hover": "#3F3F46",
-    "text_primary": "#F4F4F5",
-    "text_secondary": "#A1A1AA",
-    "text_muted": "#71717A",
-    "primary": "#D4FF00",
-    "primary_hover": "#B3D600",
-    "primary_foreground": "#000000",
-    "expense": "#FF443A",
-    "income": "#D4FF00",
-    "warning": "#FFB020",
-    "info": "#3B82F6"
-  },
+  "archetype": "7 (Electric & Neon)",
+  "domain": "Gamified Personal Finance SaaS",
   "typography": {
-    "heading_font": "Instrument Serif",
-    "body_font": "Plus Jakarta Sans",
-    "import_url": "@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');",
-    "scale": {
-      "h1": "text-5xl md:text-6xl tracking-tight font-serif",
-      "h2": "text-3xl md:text-4xl tracking-tight font-serif",
-      "h3": "text-xl font-medium font-sans text-zinc-100",
-      "h4": "text-lg font-medium font-sans text-zinc-200",
-      "body": "text-base font-sans leading-relaxed text-zinc-300",
-      "numbers_large": "text-4xl md:text-5xl font-serif tracking-tight text-white",
-      "numbers_medium": "text-2xl font-serif tracking-tight text-white",
-      "small": "text-sm font-sans tracking-wide text-zinc-400",
-      "overline": "text-xs font-bold uppercase tracking-[0.2em] text-zinc-500"
+    "headings": {
+      "family": "Orbitron",
+      "weights": ["500", "700", "900"],
+      "usage": "H1, H2, Counters, Main Balances"
+    },
+    "subheadings": {
+      "family": "Rajdhani",
+      "weights": ["500", "600", "700"],
+      "usage": "H3, H4, Card Titles, Tab Names, Overlines"
+    },
+    "body": {
+      "family": "IBM Plex Sans",
+      "weights": ["400", "500"],
+      "usage": "General text, descriptions, labels"
+    },
+    "mono": {
+      "family": "JetBrains Mono",
+      "weights": ["400", "700"],
+      "usage": "Tabular data, transaction amounts, dates, XP numbers, toasts"
     }
   },
-  "layout": {
-    "spacing_system": "Use generous spacing inside containers (p-6, p-8). Grid gaps should be gap-6.",
-    "dashboard_grid": "Grid mode 'Control Room'. grid-cols-1 md:grid-cols-3 lg:grid-cols-4. Summary cards are col-span-1. Charts take col-span-2 or col-span-3. Transactions list takes full width or remaining cols.",
-    "surface_styles": "Cardless or 'Grid Borders' look. Use bg-[#121215] with 1px solid border-[#27272A]. Max border-radius: rounded-xl for outer cards, rounded-md for inner elements."
+  "colors": {
+    "background": {
+      "main": "#050505",
+      "surface": "#0C0C14",
+      "surface_hover": "#161625"
+    },
+    "primary": {
+      "DEFAULT": "#00F0FF",
+      "glow": "rgba(0, 240, 255, 0.5)"
+    },
+    "secondary": {
+      "DEFAULT": "#B026FF",
+      "glow": "rgba(176, 38, 255, 0.5)"
+    },
+    "accent": {
+      "DEFAULT": "#FF0055",
+      "glow": "rgba(255, 0, 85, 0.5)"
+    },
+    "success": {
+      "DEFAULT": "#39FF14",
+      "glow": "rgba(57, 255, 20, 0.5)"
+    },
+    "warning": {
+      "DEFAULT": "#FFB800",
+      "glow": "rgba(255, 184, 0, 0.5)"
+    },
+    "text": {
+      "primary": "#F8F8FF",
+      "secondary": "#A1A1AA",
+      "muted": "#52525B"
+    },
+    "border": {
+      "default": "#27273A",
+      "highlight": "#00F0FF"
+    }
   },
-  "components": {
-    "buttons": "Primary: bg-[#D4FF00] text-black hover:bg-[#B3D600] rounded-full px-6 py-2 font-semibold transition-all. Secondary: bg-zinc-900 border border-zinc-800 text-white hover:bg-zinc-800 rounded-full px-6 py-2.",
-    "cards": "Minimalist. No heavy drop shadows. Rely on 1px borders. Flex-col layout. padding: p-6. Heading in font-sans text-sm text-zinc-400, Value in font-serif text-4xl.",
-    "alerts": "Negative Balance: bg-red-500/10 border border-red-500/20 text-red-400 p-4 rounded-xl. Goal Deadline: bg-amber-500/10 border border-amber-500/20 text-amber-400. Use Lucide icons (AlertCircle).",
-    "charts": "Recharts. Grid lines: stroke='#27272a'. Axis text: fill='#A1A1AA' font-size='12px'. Tooltip: custom backdrop-blur-md bg-[#121215]/90 border border-[#27272A] p-3 rounded-lg. BarChart: Income uses fill='#D4FF00', Expense uses fill='#FF443A'. PieChart: highly saturated distinct colors for categories.",
-    "modals": "Shadcn Dialog. Overlay: bg-black/80 backdrop-blur-sm. Content: bg-[#121215] border border-[#27272A]. Form fields: bg-[#050505] border-[#27272A] focus:border-[#D4FF00] focus:ring-1 focus:ring-[#D4FF00].",
-    "badges": "Pill-shaped. Category tags: bg-zinc-800 text-zinc-300 rounded-full px-3 py-1 text-xs. Status tags: bg-[#D4FF00]/10 text-[#D4FF00] (income) or bg-[#FF443A]/10 text-[#FF443A] (expense).",
-    "tabs": "Shadcn Tabs customized. List: bg-[#050505] border border-[#27272A] p-1 rounded-full. Trigger: rounded-full data-[state=active]:bg-[#27272A] data-[state=active]:text-white text-zinc-400.",
-    "skeleton_loading": "bg-zinc-800 animate-pulse rounded-md"
+  "layout_spacing": {
+    "philosophy": "Control Room / HUD Dense Layout",
+    "grid": "grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6",
+    "container_padding": "p-6",
+    "card_padding": "p-6",
+    "border_radius": "rounded-none"
   },
-  "interactions": {
-    "hover": "Interactive cards should slightly lift (-translate-y-1) and border lightens to border-zinc-600. transition-all duration-300.",
-    "animations": "Use Framer Motion for staggered list entrances. React CountUp for dashboard numbers. Progress bars (Metas tab) should animate width from 0 on load."
+  "component_guidelines": {
+    "cards": "Use flat surfaces (no glassmorphism) to keep the UI sharp. Background #0C0C14. Sharp corners (rounded-none). Use 1px solid border (#27273A). Add a 2px left border in Primary (#00F0FF) to mimic HUD brackets. On hover: border glows slightly, subtle lift.",
+    "buttons": "Sharp rectangular (rounded-none). Default state: transparent background with Primary border and Primary text. On hover: Primary background, Black text, heavy box-shadow drop-shadow-[0_0_15px_rgba(0,240,255,0.5)].",
+    "inputs": "Flat, background #050505, 1px border (#27273A). Focus state MUST use primary color border with a subtle outer glow.",
+    "tables": "Dense layout. Use JetBrains Mono for numerical data and dates. Hover states on rows should have a very subtle cyan tint background (#00F0FF/10).",
+    "tabs": "Sharp edges, segmented controls. Active tab has a neon bottom border or fully neon background with black text. Inactive tabs are muted.",
+    "progress_bars": "XP-bar style. Segmented blocks or continuous neon gradient (e.g., from #B026FF to #00F0FF). Must have a glow effect.",
+    "modals": "Dark overlay (bg-black/80 backdrop-blur-sm). Modal window has retro-futuristic borders (e.g., 1px solid cyan, with inner glow).",
+    "toasts": "Terminal/Arcade style using sonner. Dark background, monospace font. Success toast: 'ACHIEVEMENT UNLOCKED' in neon green. Error: 'SYSTEM FAILURE' in neon red.",
+    "charts": "Use Recharts with dark theme. Line/Bar colors must be neon (#00F0FF, #FF0055, #B026FF). Grid lines should be faint (#27273A). Tooltips must have dark backgrounds and sharp borders."
+  },
+  "gamification_wording": {
+    "dashboard": "Command Center",
+    "balance": "Créditos (CR)",
+    "income": "Loot / Entradas",
+    "expenses": "Burn Rate / Saídas",
+    "transactions": "Quest Log",
+    "goals": "Quests Ativas",
+    "alerts": "HUD Alerts"
+  },
+  "media": {
+    "images": [
+      {
+        "category": "auth_hero",
+        "url": "https://images.unsplash.com/photo-1771875802948-0d0f3424fe6d?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzNTl8MHwxfHNlYXJjaHwyfHxkYXJrJTIwbmVvbiUyMHRlY2glMjBiYWNrZ3JvdW5kfGVufDB8fHx8MTc3NzA1ODk5NXww&ixlib=rb-4.1.0&q=85",
+        "description": "Abstract streaks of colorful neon lights against dark background, to be used for the auth screen split visual to set the cyberpunk tone."
+      },
+      {
+        "category": "app_background",
+        "url": "https://images.pexels.com/photos/12187128/pexels-photo-12187128.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "description": "Vibrant geometric neon design, can be used as a subtle overlay or header background texture at very low opacity (5%)."
+      }
+    ]
   },
   "testing": {
-    "data_testid": "MANDATORY. Examples: login-btn, dashboard-tab, new-transaction-btn, export-csv-btn, export-pdf-btn, delete-transaction-[id]."
+    "attributes": "All interactive elements MUST use data-testid attributes (e.g., data-testid='login-button', data-testid='new-transaction-btn')."
   },
-  "media": [
-    {
-      "category": "auth_background",
-      "url": "https://static.prod-images.emergentagent.com/jobs/c105a936-b88c-409d-8882-448ea5b7bcc6/images/efd1b17d36c2143330242e80c944e52b3f58508009c21b2ddd62708d26b1ae7b.png",
-      "description": "Abstract dark 3D geometric shapes with cinematic lighting. Use as the left-side cover image on the split Auth screen."
-    },
-    {
-      "category": "dashboard_header_texture",
-      "url": "https://static.prod-images.emergentagent.com/jobs/c105a936-b88c-409d-8882-448ea5b7bcc6/images/09fbff0715fedfde5f7aec21dd81b1f0ba07a2a8fc443c31b566e089adf1f5e5.png",
-      "description": "Premium abstract data visualization background. Can be used as a subtle background image for the top summary cards (with low opacity, e.g., opacity-10) to add texture."
-    }
-  ],
   "instructions_to_main_agent": [
-    "Tech Stack: React JS (NOT TS!), Tailwind CSS, Shadcn UI primitives, Recharts, Lucide React, Framer Motion.",
-    "Install needed libraries: yarn add recharts framer-motion lucide-react react-countup date-fns papaparse js-cookie",
-    "Setup Tailwind: Customize tailwind.config.js to include the custom colors (background: #050505, primary: #D4FF00, etc.) and fonts (font-serif: 'Instrument Serif', font-sans: 'Plus Jakarta Sans').",
-    "Fonts: Add the provided import_url to index.css and apply 'font-sans bg-background text-text_primary' to the body.",
-    "Auth Screen: Create a split layout. Use the 'auth_background' image on one side. Implement email/password login and signup forms.",
-    "Dashboard Navigation: Include a Header with Logo ('FinançasPro'), Sync indicator (spinning icon or green dot when synced), and Logout (showing user email).",
-    "Dashboard Summary: Render Income, Expense, and Balance cards. Use 'Instrument Serif' for the large numbers to give an editorial, high-end feel.",
-    "Alerts Panel: Build a section that conditionally shows alerts if balance < 0 or if any goal deadline is <= 30 days.",
-    "Tabs: Implement Lista, Gráficos, and Metas tabs.",
-    "Transactions (Lista): Add month/period filter, transaction list with category badges, and delete button. Include 'New Transaction' modal.",
-    "Charts (Gráficos): Use Recharts. BarChart for monthly income vs expenses. PieChart for expenses by category. Apply dark mode styling (stroke='#27272A').",
-    "Goals (Metas): Render cards with animated progress bars (Framer Motion). Include 'New Goal' modal with emoji picker (🎯 🏠 ✈️ 🚗 📱 🎓 💍 🛡️ 💻 🌴) and 'Deposit' modal to add funds to a goal.",
-    "Export: Implement CSV export (BRL format with BOM, can use papaparse or custom blob) and PDF export (using window.print() triggered via a specialized print-only CSS layout or just calling print()).",
-    "Notifications: Use Sonner or custom Toast for feedback (login success, transaction added, goal created, etc.).",
-    "Testing: Add data-testid attributes to ALL interactive elements (buttons, inputs, tabs). This is strict.",
-    "Language: The entire UI must be in Portuguese-BR (pt-BR)."
+    "Build the UI in pt-BR. Combine gamified terminology with standard finance terms (e.g., 'Metas (Quests)', 'Saldo (Créditos)', 'Transações (Quest Log)').",
+    "Use lucide-react for icons.",
+    "Implement the Auth screen, Dashboard with 3 summary cards, Alerts panel, and Tabs (Lista/Gráficos/Metas).",
+    "Use CountUp (react-countup) for the summary card numbers. Use Orbitron font for these.",
+    "Add Recharts BarChart (Receitas vs Despesas) and PieChart (Despesas por categoria), fully customized with the neon palette.",
+    "Implement the Goals section as 'Quests' with progress bars mimicking RPG XP bars. Include a deposit modal.",
+    "Ensure the New Transaction and New Goal modals use the 'Gamer' dark styling, and use an emoji picker for the goals.",
+    "Add CSV and PDF export functionality for the transactions table.",
+    "Use framer-motion for glitch hover effects, list entrance staggers, and modal animations.",
+    "Replace Shadcn's default rounded styles with `rounded-none` across the board to maintain the sharp, hard-edge gamer aesthetic."
   ]
 }
