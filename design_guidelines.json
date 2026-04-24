@@ -1,0 +1,90 @@
+{
+  "theme": "dark",
+  "archetype": "Swiss Luxury Fintech (Mix of Archetype 4 and 5)",
+  "core_concept": "Dark Fintech with an editorial edge. Combining hyper-modern stark layouts with 'Instrument Serif' for a premium, institutional feel contrasting with vibrant 'Acid Green' accents.",
+  "colors": {
+    "background": "#050505",
+    "surface": "#121215",
+    "surface_hover": "#18181B",
+    "border": "#27272A",
+    "border_hover": "#3F3F46",
+    "text_primary": "#F4F4F5",
+    "text_secondary": "#A1A1AA",
+    "text_muted": "#71717A",
+    "primary": "#D4FF00",
+    "primary_hover": "#B3D600",
+    "primary_foreground": "#000000",
+    "expense": "#FF443A",
+    "income": "#D4FF00",
+    "warning": "#FFB020",
+    "info": "#3B82F6"
+  },
+  "typography": {
+    "heading_font": "Instrument Serif",
+    "body_font": "Plus Jakarta Sans",
+    "import_url": "@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');",
+    "scale": {
+      "h1": "text-5xl md:text-6xl tracking-tight font-serif",
+      "h2": "text-3xl md:text-4xl tracking-tight font-serif",
+      "h3": "text-xl font-medium font-sans text-zinc-100",
+      "h4": "text-lg font-medium font-sans text-zinc-200",
+      "body": "text-base font-sans leading-relaxed text-zinc-300",
+      "numbers_large": "text-4xl md:text-5xl font-serif tracking-tight text-white",
+      "numbers_medium": "text-2xl font-serif tracking-tight text-white",
+      "small": "text-sm font-sans tracking-wide text-zinc-400",
+      "overline": "text-xs font-bold uppercase tracking-[0.2em] text-zinc-500"
+    }
+  },
+  "layout": {
+    "spacing_system": "Use generous spacing inside containers (p-6, p-8). Grid gaps should be gap-6.",
+    "dashboard_grid": "Grid mode 'Control Room'. grid-cols-1 md:grid-cols-3 lg:grid-cols-4. Summary cards are col-span-1. Charts take col-span-2 or col-span-3. Transactions list takes full width or remaining cols.",
+    "surface_styles": "Cardless or 'Grid Borders' look. Use bg-[#121215] with 1px solid border-[#27272A]. Max border-radius: rounded-xl for outer cards, rounded-md for inner elements."
+  },
+  "components": {
+    "buttons": "Primary: bg-[#D4FF00] text-black hover:bg-[#B3D600] rounded-full px-6 py-2 font-semibold transition-all. Secondary: bg-zinc-900 border border-zinc-800 text-white hover:bg-zinc-800 rounded-full px-6 py-2.",
+    "cards": "Minimalist. No heavy drop shadows. Rely on 1px borders. Flex-col layout. padding: p-6. Heading in font-sans text-sm text-zinc-400, Value in font-serif text-4xl.",
+    "alerts": "Negative Balance: bg-red-500/10 border border-red-500/20 text-red-400 p-4 rounded-xl. Goal Deadline: bg-amber-500/10 border border-amber-500/20 text-amber-400. Use Lucide icons (AlertCircle).",
+    "charts": "Recharts. Grid lines: stroke='#27272a'. Axis text: fill='#A1A1AA' font-size='12px'. Tooltip: custom backdrop-blur-md bg-[#121215]/90 border border-[#27272A] p-3 rounded-lg. BarChart: Income uses fill='#D4FF00', Expense uses fill='#FF443A'. PieChart: highly saturated distinct colors for categories.",
+    "modals": "Shadcn Dialog. Overlay: bg-black/80 backdrop-blur-sm. Content: bg-[#121215] border border-[#27272A]. Form fields: bg-[#050505] border-[#27272A] focus:border-[#D4FF00] focus:ring-1 focus:ring-[#D4FF00].",
+    "badges": "Pill-shaped. Category tags: bg-zinc-800 text-zinc-300 rounded-full px-3 py-1 text-xs. Status tags: bg-[#D4FF00]/10 text-[#D4FF00] (income) or bg-[#FF443A]/10 text-[#FF443A] (expense).",
+    "tabs": "Shadcn Tabs customized. List: bg-[#050505] border border-[#27272A] p-1 rounded-full. Trigger: rounded-full data-[state=active]:bg-[#27272A] data-[state=active]:text-white text-zinc-400.",
+    "skeleton_loading": "bg-zinc-800 animate-pulse rounded-md"
+  },
+  "interactions": {
+    "hover": "Interactive cards should slightly lift (-translate-y-1) and border lightens to border-zinc-600. transition-all duration-300.",
+    "animations": "Use Framer Motion for staggered list entrances. React CountUp for dashboard numbers. Progress bars (Metas tab) should animate width from 0 on load."
+  },
+  "testing": {
+    "data_testid": "MANDATORY. Examples: login-btn, dashboard-tab, new-transaction-btn, export-csv-btn, export-pdf-btn, delete-transaction-[id]."
+  },
+  "media": [
+    {
+      "category": "auth_background",
+      "url": "https://static.prod-images.emergentagent.com/jobs/c105a936-b88c-409d-8882-448ea5b7bcc6/images/efd1b17d36c2143330242e80c944e52b3f58508009c21b2ddd62708d26b1ae7b.png",
+      "description": "Abstract dark 3D geometric shapes with cinematic lighting. Use as the left-side cover image on the split Auth screen."
+    },
+    {
+      "category": "dashboard_header_texture",
+      "url": "https://static.prod-images.emergentagent.com/jobs/c105a936-b88c-409d-8882-448ea5b7bcc6/images/09fbff0715fedfde5f7aec21dd81b1f0ba07a2a8fc443c31b566e089adf1f5e5.png",
+      "description": "Premium abstract data visualization background. Can be used as a subtle background image for the top summary cards (with low opacity, e.g., opacity-10) to add texture."
+    }
+  ],
+  "instructions_to_main_agent": [
+    "Tech Stack: React JS (NOT TS!), Tailwind CSS, Shadcn UI primitives, Recharts, Lucide React, Framer Motion.",
+    "Install needed libraries: yarn add recharts framer-motion lucide-react react-countup date-fns papaparse js-cookie",
+    "Setup Tailwind: Customize tailwind.config.js to include the custom colors (background: #050505, primary: #D4FF00, etc.) and fonts (font-serif: 'Instrument Serif', font-sans: 'Plus Jakarta Sans').",
+    "Fonts: Add the provided import_url to index.css and apply 'font-sans bg-background text-text_primary' to the body.",
+    "Auth Screen: Create a split layout. Use the 'auth_background' image on one side. Implement email/password login and signup forms.",
+    "Dashboard Navigation: Include a Header with Logo ('FinançasPro'), Sync indicator (spinning icon or green dot when synced), and Logout (showing user email).",
+    "Dashboard Summary: Render Income, Expense, and Balance cards. Use 'Instrument Serif' for the large numbers to give an editorial, high-end feel.",
+    "Alerts Panel: Build a section that conditionally shows alerts if balance < 0 or if any goal deadline is <= 30 days.",
+    "Tabs: Implement Lista, Gráficos, and Metas tabs.",
+    "Transactions (Lista): Add month/period filter, transaction list with category badges, and delete button. Include 'New Transaction' modal.",
+    "Charts (Gráficos): Use Recharts. BarChart for monthly income vs expenses. PieChart for expenses by category. Apply dark mode styling (stroke='#27272A').",
+    "Goals (Metas): Render cards with animated progress bars (Framer Motion). Include 'New Goal' modal with emoji picker (🎯 🏠 ✈️ 🚗 📱 🎓 💍 🛡️ 💻 🌴) and 'Deposit' modal to add funds to a goal.",
+    "Export: Implement CSV export (BRL format with BOM, can use papaparse or custom blob) and PDF export (using window.print() triggered via a specialized print-only CSS layout or just calling print()).",
+    "Notifications: Use Sonner or custom Toast for feedback (login success, transaction added, goal created, etc.).",
+    "Testing: Add data-testid attributes to ALL interactive elements (buttons, inputs, tabs). This is strict.",
+    "Language: The entire UI must be in Portuguese-BR (pt-BR)."
+  ]
+}
