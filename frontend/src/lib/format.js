@@ -34,11 +34,11 @@ export const EXPENSE_CATEGORIES = ["Moradia", "Alimentação", "Transporte", "Sa
 export const GOAL_EMOJIS = ["🎯", "🏠", "✈️", "🚗", "📱", "🎓", "💍", "🛡️", "💻", "🌴"];
 
 export const CATEGORY_COLORS = {
-  "Moradia": "#D4FF00",
-  "Alimentação": "#FF443A",
-  "Transporte": "#3B82F6",
-  "Saúde": "#A855F7",
-  "Lazer": "#F59E0B",
-  "Educação": "#10B981",
-  "Outros": "#71717A",
+  "Moradia": "#00F0FF",
+  "Alimentação": "#FF0055",
+  "Transporte": "#B026FF",
+  "Saúde": "#39FF14",
+  "Lazer": "#FFB800",
+  "Educação": "#00B4A8",
+  "Outros": "#52525B",
 };

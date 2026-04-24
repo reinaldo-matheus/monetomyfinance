@@ -9,8 +9,8 @@ function Gate({ children, requireAuth }) {
   const { user, checked } = useAuth();
   if (!checked) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-brand-bg">
-        <div className="text-brand-muted text-sm">Carregando...</div>
+      <div className="flex min-h-screen items-center justify-center bg-hud-bg">
+        <div className="font-mono-hud text-xs uppercase tracking-[0.3em] text-hud-cyan glow-cyan-text animate-pulse">&gt; carregando sistema...</div>
       </div>
     );
   }

@@ -19,7 +19,7 @@ export function exportCSV(transactions, user) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `financaspro-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.download = `moneto-${new Date().toISOString().slice(0, 10)}.csv`;
   a.click();
   URL.revokeObjectURL(url);
 }
@@ -62,8 +62,8 @@ export function exportPDF({ transactions, goals, totals, user }) {
       return `<tr><td>${g.emoji} ${g.name}</td><td>${BRL(g.saved)} / ${BRL(g.target)}</td><td>${pct}%</td><td>${formatDateBR(g.deadline)}</td></tr>`;
     })
     .join("");
-  w.document.write(`<html><head><title>FinançasPro — Relatório</title>${style}</head><body>
-    <h1>FinançasPro — Relatório</h1>
+  w.document.write(`<html><head><title>Moneto — Relatório</title>${style}</head><body>
+    <h1>Moneto — Relatório</h1>
     <div class="sub">Gerado em ${new Date().toLocaleString("pt-BR")} · ${user?.email || ""}</div>
     <div class="cards">
       <div class="card"><div class="lbl">Receitas</div><div class="val">${BRL(totals.income)}</div></div>

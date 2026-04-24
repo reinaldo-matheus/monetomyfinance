@@ -1,53 +1,92 @@
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-    color-scheme: dark;
+  color-scheme: dark;
 }
 
 html, body, #root {
-    background: #050505;
-    color: #F4F4F5;
-    font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    margin: 0;
-    min-height: 100%;
+  background: #050505;
+  color: #F8F8FF;
+  font-family: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  margin: 0;
+  min-height: 100%;
 }
 
-.font-serif-display {
-    font-family: 'Instrument Serif', ui-serif, Georgia, serif;
-    font-weight: 400;
-    letter-spacing: -0.02em;
+.font-display { font-family: 'Orbitron', sans-serif; letter-spacing: 0.02em; }
+.font-heading { font-family: 'Rajdhani', sans-serif; }
+.font-mono-hud { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+
+/* Overline / label gamer */
+.label-hud {
+  font-family: 'JetBrains Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.25em;
+  font-size: 0.6875rem;
+  color: #52525B;
 }
 
-/* Subtle grid background */
-.bg-grid {
-    background-image:
-        linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
-    background-size: 64px 64px;
+/* Grid / HUD background */
+.bg-hud-grid {
+  background-image:
+    linear-gradient(rgba(0, 240, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 240, 255, 0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
 }
 
-.radial-lime {
-    background: radial-gradient(ellipse 60% 40% at 30% 0%, rgba(212, 255, 0, 0.10), transparent 60%);
+.bg-scanlines {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.02) 0px,
+    rgba(255, 255, 255, 0.02) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+}
+
+.neon-radial {
+  background:
+    radial-gradient(ellipse 60% 40% at 15% 0%, rgba(0, 240, 255, 0.10), transparent 60%),
+    radial-gradient(ellipse 60% 40% at 90% 100%, rgba(176, 38, 255, 0.10), transparent 60%);
+}
+
+/* HUD bracket corners — use as absolute spans on a relative container */
+.hud-bracket { position: absolute; width: 14px; height: 14px; border-color: #00F0FF; pointer-events: none; }
+.hud-bracket.tl { top: -1px; left: -1px; border-top: 1px solid; border-left: 1px solid; }
+.hud-bracket.tr { top: -1px; right: -1px; border-top: 1px solid; border-right: 1px solid; }
+.hud-bracket.bl { bottom: -1px; left: -1px; border-bottom: 1px solid; border-left: 1px solid; }
+.hud-bracket.br { bottom: -1px; right: -1px; border-bottom: 1px solid; border-right: 1px solid; }
+
+/* Text glow helpers */
+.glow-cyan-text { text-shadow: 0 0 12px rgba(0, 240, 255, 0.6); }
+.glow-pink-text { text-shadow: 0 0 12px rgba(255, 0, 85, 0.6); }
+.glow-green-text { text-shadow: 0 0 12px rgba(57, 255, 20, 0.6); }
+
+/* Button ghost-neon */
+.btn-hud {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  transition: all 0.2s ease;
 }
 
 /* Scrollbar */
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: #050505; }
-::-webkit-scrollbar-thumb { background: #27272A; border-radius: 6px; }
-::-webkit-scrollbar-thumb:hover { background: #3F3F46; }
+::-webkit-scrollbar-thumb { background: #27273A; }
+::-webkit-scrollbar-thumb:hover { background: #00F0FF; }
 
-/* Selection */
-::selection { background: #D4FF00; color: #000; }
+::selection { background: #00F0FF; color: #000; }
 
-/* Toast animation */
+/* Toast entrance */
 @keyframes fadeUp {
-    from { opacity: 0; transform: translate(-50%, 12px); }
-    to   { opacity: 1; transform: translate(-50%, 0); }
+  from { opacity: 0; transform: translate(-50%, 12px); }
+  to   { opacity: 1; transform: translate(-50%, 0); }
 }
 .toast-anim { animation: fadeUp 0.25s ease-out; }
 
@@ -55,39 +94,57 @@ html, body, #root {
 @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 .fade-in { animation: fadeIn 0.4s ease-out both; }
 
-/* Print styles for PDF export */
-@media print {
-    body { background: #fff !important; color: #000 !important; }
-    .no-print { display: none !important; }
-    .print-only { display: block !important; }
-    table { border-collapse: collapse; width: 100%; }
-    th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; font-size: 12px; }
-    th { background: #f2f2f2; }
+/* Scan line overlay (for cards) */
+@keyframes scanSweep {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(200%); }
 }
-.print-only { display: none; }
+.scan-line {
+  position: absolute; left: 0; right: 0; height: 80px;
+  background: linear-gradient(to bottom, transparent, rgba(0,240,255,0.08), transparent);
+  animation: scanSweep 6s linear infinite;
+  pointer-events: none;
+}
 
-/* Legacy shadcn vars — kept minimal so installed UI primitives don't break */
+/* Progress XP bar */
+.xp-bar-fill {
+  background: linear-gradient(90deg, #B026FF 0%, #00F0FF 100%);
+  box-shadow: 0 0 12px rgba(0, 240, 255, 0.6), inset 0 0 6px rgba(255, 255, 255, 0.15);
+}
+.xp-bar-fill.danger { background: linear-gradient(90deg, #FF0055 0%, #FFB800 100%); box-shadow: 0 0 12px rgba(255, 0, 85, 0.6); }
+.xp-bar-fill.done   { background: linear-gradient(90deg, #00F0FF 0%, #39FF14 100%); box-shadow: 0 0 14px rgba(57, 255, 20, 0.7); }
+
+/* Print styles (PDF export) */
+@media print {
+  body { background: #fff !important; color: #000 !important; }
+  .no-print { display: none !important; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; font-size: 12px; }
+  th { background: #f2f2f2; }
+}
+
+/* Legacy shadcn vars — kept minimal */
 @layer base {
-    :root {
-        --background: 240 6% 3%;
-        --foreground: 0 0% 96%;
-        --card: 240 5% 8%;
-        --card-foreground: 0 0% 96%;
-        --popover: 240 5% 8%;
-        --popover-foreground: 0 0% 96%;
-        --primary: 72 100% 50%;
-        --primary-foreground: 0 0% 0%;
-        --secondary: 240 4% 12%;
-        --secondary-foreground: 0 0% 96%;
-        --muted: 240 4% 12%;
-        --muted-foreground: 240 5% 65%;
-        --accent: 240 4% 16%;
-        --accent-foreground: 0 0% 96%;
-        --destructive: 3 100% 62%;
-        --destructive-foreground: 0 0% 98%;
-        --border: 240 4% 16%;
-        --input: 240 4% 16%;
-        --ring: 72 100% 50%;
-        --radius: 0.75rem;
-    }
+  :root {
+    --background: 240 10% 3%;
+    --foreground: 0 0% 97%;
+    --card: 240 20% 6%;
+    --card-foreground: 0 0% 97%;
+    --popover: 240 20% 6%;
+    --popover-foreground: 0 0% 97%;
+    --primary: 185 100% 50%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 240 10% 12%;
+    --secondary-foreground: 0 0% 97%;
+    --muted: 240 10% 12%;
+    --muted-foreground: 240 5% 65%;
+    --accent: 240 10% 14%;
+    --accent-foreground: 0 0% 97%;
+    --destructive: 342 100% 50%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 10% 20%;
+    --input: 240 10% 20%;
+    --ring: 185 100% 50%;
+    --radius: 0rem;
+  }
 }

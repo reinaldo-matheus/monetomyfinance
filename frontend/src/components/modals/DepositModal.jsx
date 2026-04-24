@@ -15,38 +15,32 @@ export default function DepositModal({ open, onClose, goal, onSubmit }) {
     e.preventDefault();
     if (!amount || Number(amount) <= 0) return;
     setLoading(true);
-    try {
-      await onSubmit(goal, Number(amount));
-      onClose();
-    } finally { setLoading(false); }
+    try { await onSubmit(goal, Number(amount)); onClose(); }
+    finally { setLoading(false); }
   };
 
   return (
-    <Modal open={open} onClose={onClose} title={`Depositar em ${goal.emoji} ${goal.name}`} testid="deposit-modal">
+    <Modal open={open} onClose={onClose} title={`XP+ em ${goal.emoji} ${goal.name}`} testid="deposit-modal">
       <form onSubmit={submit} className="space-y-4">
-        <div className="rounded-lg border border-brand-border bg-brand-bg p-4">
-          <div className="text-xs uppercase tracking-widest text-brand-dim">Falta</div>
-          <div className="font-serif-display text-3xl">{BRL(missing)}</div>
+        <div className="border border-hud-border bg-hud-bg p-4">
+          <span className="label-hud">XP RESTANTE</span>
+          <div className="font-display text-3xl font-bold text-hud-pink glow-pink-text">{BRL(missing)}</div>
         </div>
         <label className="block">
-          <span className="mb-1.5 block text-xs uppercase tracking-widest text-brand-dim">Valor a depositar</span>
+          <span className="label-hud mb-1.5 block">Valor do aporte</span>
           <input
             data-testid="deposit-amount-input"
             type="number" step="0.01" min="0.01" required
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            autoFocus
-            placeholder="0,00"
-            className="w-full rounded-md border border-brand-border bg-brand-bg px-3 py-2.5 text-sm outline-none transition-colors focus:border-[#D4FF00] focus:ring-1 focus:ring-[#D4FF00]"
+            value={amount} onChange={(e) => setAmount(e.target.value)}
+            autoFocus placeholder="0,00"
+            className="w-full border border-hud-border bg-hud-bg px-3 py-2.5 font-mono-hud text-sm outline-none transition-all focus:border-hud-cyan focus:shadow-glow-cyan"
           />
         </label>
         <button
-          type="submit"
-          data-testid="deposit-submit-btn"
-          disabled={loading}
-          className="w-full rounded-full bg-[#D4FF00] px-6 py-3 text-sm font-semibold text-black transition-all hover:bg-[#B3D600] disabled:opacity-60"
+          type="submit" data-testid="deposit-submit-btn" disabled={loading}
+          className="btn-hud flex w-full items-center justify-center gap-2 border border-hud-green bg-hud-green/10 px-6 py-3 text-xs text-hud-green transition-all hover:bg-hud-green hover:text-black hover:shadow-glow-green disabled:opacity-50"
         >
-          {loading ? "Depositando..." : "Confirmar depósito"}
+          {loading ? "PROCESSANDO..." : "CONFIRMAR XP"}
         </button>
       </form>
     </Modal>
