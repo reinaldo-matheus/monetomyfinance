@@ -1,0 +1,37 @@
+{
+  "summary": "Backend-only testing for FinançasPro completed. 15/15 pytest tests passed covering auth (register/login/me/logout), validation (422 for bad email/short password/non-positive value), transactions CRUD + sorted-by-date, goals CRUD + deposit, row-level security across two users, brute force lockout (5 fails => 429 with 'Muitas tentativas'), admin seed login, and health endpoint. Verified bcrypt hash format ($2b$) and all required MongoDB indexes (users.email unique, transactions user_id+date, goals user_id, login_attempts.identifier).",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "/api/auth/logout", "issue": "Logout requires valid access_token (depends on get_current_user). If token expired or cookies already cleared, client cannot log out — returns 401. Consider making logout idempotent (best-effort cookie clear)."},
+      {"endpoint": "CORS", "issue": "allow_origins is hardcoded to [FRONTEND_URL, http://localhost:3000]. CORS_ORIGINS env var is set to '*' in .env but not consumed by the code."},
+      {"endpoint": "/api/auth/login brute-force", "issue": "Rate-limit key uses request.client.host; behind a proxy/ingress this may collapse to a shared IP and affect other users of the same email. Consider X-Forwarded-For parsing."}
+    ]
+  },
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/backend/tests/test_backend.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [
+    "Optional: make POST /api/auth/logout idempotent (don't require valid access_token; just clear cookies).",
+    "Optional: honor CORS_ORIGINS env var or remove it to reduce configuration drift.",
+    "Optional: consider TTL index on login_attempts (auto-expire after 15 min) instead of only time-window check."
+  ],
+  "critical_code_review_comments": [
+    "seed_admin correctly rehashes when env password differs (meets playbook).",
+    "All resource endpoints correctly scope queries with user_id (RLS verified across two users).",
+    "MongoDB _id correctly excluded with projection {_id: 0} on reads; create_transaction/create_goal also pop _id after insert_one (good).",
+    "Cookies use SameSite=None + Secure (correct for cross-origin preview).",
+    "Pydantic validations (EmailStr, min_length=6, gt=0) return 422 as expected.",
+    "Using FastAPI on_event('startup') is deprecated in newer FastAPI; consider lifespan handlers (non-blocking)."
+  ],
+  "updated_files": ["/app/backend/tests/test_backend.py"],
+  "success_rate": {"backend": "100%", "frontend": "not-tested"},
+  "test_credentials": "Admin admin@financaspro.com / admin123 verified working. Arbitrary TEST_* users registered during tests.",
+  "seed_data_creation": "Each test creates its own TEST_<suffix>@x.com users. No seeded fixtures beyond the admin auto-seed.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Backend endpoints all working. Brute-force test adds 6 failed entries for the TEST_bf user's ip:email in login_attempts — they auto-clear after 15 min or upon successful login. If re-running tests and hitting 429 unexpectedly, clear login_attempts collection.",
+  "rca of the issue": "No issues to RCA — all tests passed."
+}

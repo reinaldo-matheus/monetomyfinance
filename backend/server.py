@@ -1,89 +1,342 @@
-from fastapi import FastAPI, APIRouter
 from dotenv import load_dotenv
-from starlette.middleware.cors import CORSMiddleware
-from motor.motor_asyncio import AsyncIOMotorClient
-import os
-import logging
 from pathlib import Path
-from pydantic import BaseModel, Field, ConfigDict
-from typing import List
-import uuid
-from datetime import datetime, timezone
-
-
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
-# MongoDB connection
+import os
+import uuid
+import logging
+import bcrypt
+import jwt
+from datetime import datetime, timezone, timedelta
+from typing import List, Literal, Optional
+
+from fastapi import FastAPI, APIRouter, HTTPException, Request, Response, Depends
+from starlette.middleware.cors import CORSMiddleware
+from motor.motor_asyncio import AsyncIOMotorClient
+from pydantic import BaseModel, Field, EmailStr, ConfigDict
+
+
+# --- DB ---
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
-# Create the main app without a prefix
+# --- App ---
 app = FastAPI()
-
-# Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
 
+JWT_ALGORITHM = "HS256"
 
-# Define Models
-class StatusCheck(BaseModel):
-    model_config = ConfigDict(extra="ignore")  # Ignore MongoDB's _id field
-    
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    client_name: str
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+def get_jwt_secret() -> str:
+    return os.environ["JWT_SECRET"]
 
-class StatusCheckCreate(BaseModel):
-    client_name: str
+# --- Password helpers ---
+def hash_password(password: str) -> str:
+    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
-# Add your routes to the router instead of directly to app
+def verify_password(plain: str, hashed: str) -> bool:
+    try:
+        return bcrypt.checkpw(plain.encode("utf-8"), hashed.encode("utf-8"))
+    except Exception:
+        return False
+
+# --- JWT helpers ---
+def create_access_token(user_id: str, email: str) -> str:
+    payload = {
+        "sub": user_id, "email": email, "type": "access",
+        "exp": datetime.now(timezone.utc) + timedelta(minutes=60 * 24),  # 1 day for dev UX
+    }
+    return jwt.encode(payload, get_jwt_secret(), algorithm=JWT_ALGORITHM)
+
+def create_refresh_token(user_id: str) -> str:
+    payload = {
+        "sub": user_id, "type": "refresh",
+        "exp": datetime.now(timezone.utc) + timedelta(days=7),
+    }
+    return jwt.encode(payload, get_jwt_secret(), algorithm=JWT_ALGORITHM)
+
+def set_auth_cookies(response: Response, access: str, refresh: str):
+    response.set_cookie("access_token", access, httponly=True, secure=True, samesite="none", max_age=86400, path="/")
+    response.set_cookie("refresh_token", refresh, httponly=True, secure=True, samesite="none", max_age=604800, path="/")
+
+def clear_auth_cookies(response: Response):
+    response.delete_cookie("access_token", path="/")
+    response.delete_cookie("refresh_token", path="/")
+
+# --- Models ---
+class UserPublic(BaseModel):
+    id: str
+    email: EmailStr
+    role: str = "user"
+    created_at: datetime
+
+class RegisterBody(BaseModel):
+    email: EmailStr
+    password: str = Field(min_length=6)
+
+class LoginBody(BaseModel):
+    email: EmailStr
+    password: str
+
+class TransactionCreate(BaseModel):
+    type: Literal["receita", "despesa"]
+    description: str = Field(min_length=1)
+    value: float = Field(gt=0)
+    category: str
+    date: str  # YYYY-MM-DD
+
+class Transaction(BaseModel):
+    id: str
+    user_id: str
+    type: str
+    description: str
+    value: float
+    category: str
+    date: str
+    created_at: datetime
+
+class GoalCreate(BaseModel):
+    name: str
+    emoji: str = "🎯"
+    target: float = Field(gt=0)
+    saved: float = 0
+    deadline: str
+
+class Goal(BaseModel):
+    id: str
+    user_id: str
+    name: str
+    emoji: str
+    target: float
+    saved: float
+    deadline: str
+    created_at: datetime
+
+class DepositBody(BaseModel):
+    amount: float = Field(gt=0)
+
+# --- Auth dependency ---
+async def get_current_user(request: Request) -> dict:
+    token = request.cookies.get("access_token")
+    if not token:
+        auth_header = request.headers.get("Authorization", "")
+        if auth_header.startswith("Bearer "):
+            token = auth_header[7:]
+    if not token:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    try:
+        payload = jwt.decode(token, get_jwt_secret(), algorithms=[JWT_ALGORITHM])
+        if payload.get("type") != "access":
+            raise HTTPException(status_code=401, detail="Invalid token type")
+        user = await db.users.find_one({"id": payload["sub"]}, {"_id": 0, "password_hash": 0})
+        if not user:
+            raise HTTPException(status_code=401, detail="User not found")
+        return user
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+# --- Brute force ---
+LOCKOUT_MAX = 5
+LOCKOUT_WINDOW = 15 * 60
+
+async def check_lockout(identifier: str):
+    now = datetime.now(timezone.utc)
+    rec = await db.login_attempts.find_one({"identifier": identifier})
+    if rec and rec.get("count", 0) >= LOCKOUT_MAX:
+        last = rec.get("last_at")
+        if isinstance(last, str):
+            last = datetime.fromisoformat(last)
+        if last and (now - last).total_seconds() < LOCKOUT_WINDOW:
+            raise HTTPException(status_code=429, detail="Muitas tentativas. Tente novamente em 15 minutos.")
+
+async def register_failed(identifier: str):
+    await db.login_attempts.update_one(
+        {"identifier": identifier},
+        {"$inc": {"count": 1}, "$set": {"last_at": datetime.now(timezone.utc).isoformat()}},
+        upsert=True,
+    )
+
+async def clear_failed(identifier: str):
+    await db.login_attempts.delete_one({"identifier": identifier})
+
+# --- Auth endpoints ---
+@api_router.post("/auth/register")
+async def register(body: RegisterBody, response: Response):
+    email = body.email.lower().strip()
+    if await db.users.find_one({"email": email}):
+        raise HTTPException(status_code=400, detail="E-mail já cadastrado")
+    user_id = str(uuid.uuid4())
+    now = datetime.now(timezone.utc)
+    doc = {
+        "id": user_id,
+        "email": email,
+        "password_hash": hash_password(body.password),
+        "role": "user",
+        "created_at": now.isoformat(),
+    }
+    await db.users.insert_one(doc)
+    access = create_access_token(user_id, email)
+    refresh = create_refresh_token(user_id)
+    set_auth_cookies(response, access, refresh)
+    return {"id": user_id, "email": email, "role": "user", "created_at": now.isoformat()}
+
+@api_router.post("/auth/login")
+async def login(body: LoginBody, request: Request, response: Response):
+    email = body.email.lower().strip()
+    ip = request.client.host if request.client else "unknown"
+    identifier = f"{ip}:{email}"
+    await check_lockout(identifier)
+    user = await db.users.find_one({"email": email})
+    if not user or not verify_password(body.password, user["password_hash"]):
+        await register_failed(identifier)
+        raise HTTPException(status_code=401, detail="E-mail ou senha inválidos")
+    await clear_failed(identifier)
+    access = create_access_token(user["id"], email)
+    refresh = create_refresh_token(user["id"])
+    set_auth_cookies(response, access, refresh)
+    return {"id": user["id"], "email": email, "role": user.get("role", "user"), "created_at": user["created_at"]}
+
+@api_router.post("/auth/logout")
+async def logout(response: Response, _: dict = Depends(get_current_user)):
+    clear_auth_cookies(response)
+    return {"ok": True}
+
+@api_router.get("/auth/me")
+async def me(user: dict = Depends(get_current_user)):
+    return {"id": user["id"], "email": user["email"], "role": user.get("role", "user"), "created_at": user["created_at"]}
+
+@api_router.post("/auth/refresh")
+async def refresh(request: Request, response: Response):
+    token = request.cookies.get("refresh_token")
+    if not token:
+        raise HTTPException(status_code=401, detail="No refresh token")
+    try:
+        payload = jwt.decode(token, get_jwt_secret(), algorithms=[JWT_ALGORITHM])
+        if payload.get("type") != "refresh":
+            raise HTTPException(status_code=401, detail="Invalid token type")
+        user = await db.users.find_one({"id": payload["sub"]}, {"_id": 0, "password_hash": 0})
+        if not user:
+            raise HTTPException(status_code=401, detail="User not found")
+        access = create_access_token(user["id"], user["email"])
+        response.set_cookie("access_token", access, httponly=True, secure=True, samesite="none", max_age=86400, path="/")
+        return {"ok": True}
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid refresh token")
+
+# --- Transactions ---
+@api_router.get("/transactions")
+async def list_transactions(user: dict = Depends(get_current_user)):
+    items = await db.transactions.find({"user_id": user["id"]}, {"_id": 0}).sort("date", -1).to_list(2000)
+    return items
+
+@api_router.post("/transactions")
+async def create_transaction(body: TransactionCreate, user: dict = Depends(get_current_user)):
+    doc = {
+        "id": str(uuid.uuid4()),
+        "user_id": user["id"],
+        "type": body.type,
+        "description": body.description,
+        "value": float(body.value),
+        "category": body.category,
+        "date": body.date,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.transactions.insert_one(doc)
+    doc.pop("_id", None)
+    return doc
+
+@api_router.delete("/transactions/{tx_id}")
+async def delete_transaction(tx_id: str, user: dict = Depends(get_current_user)):
+    r = await db.transactions.delete_one({"id": tx_id, "user_id": user["id"]})
+    if r.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Transação não encontrada")
+    return {"ok": True}
+
+# --- Goals ---
+@api_router.get("/goals")
+async def list_goals(user: dict = Depends(get_current_user)):
+    items = await db.goals.find({"user_id": user["id"]}, {"_id": 0}).sort("deadline", 1).to_list(500)
+    return items
+
+@api_router.post("/goals")
+async def create_goal(body: GoalCreate, user: dict = Depends(get_current_user)):
+    doc = {
+        "id": str(uuid.uuid4()),
+        "user_id": user["id"],
+        "name": body.name,
+        "emoji": body.emoji or "🎯",
+        "target": float(body.target),
+        "saved": float(body.saved or 0),
+        "deadline": body.deadline,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.goals.insert_one(doc)
+    doc.pop("_id", None)
+    return doc
+
+@api_router.put("/goals/{goal_id}/deposit")
+async def deposit_goal(goal_id: str, body: DepositBody, user: dict = Depends(get_current_user)):
+    goal = await db.goals.find_one({"id": goal_id, "user_id": user["id"]}, {"_id": 0})
+    if not goal:
+        raise HTTPException(status_code=404, detail="Meta não encontrada")
+    new_saved = float(goal["saved"]) + float(body.amount)
+    await db.goals.update_one({"id": goal_id, "user_id": user["id"]}, {"$set": {"saved": new_saved}})
+    goal["saved"] = new_saved
+    return goal
+
+@api_router.delete("/goals/{goal_id}")
+async def delete_goal(goal_id: str, user: dict = Depends(get_current_user)):
+    r = await db.goals.delete_one({"id": goal_id, "user_id": user["id"]})
+    if r.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Meta não encontrada")
+    return {"ok": True}
+
+# --- Health ---
 @api_router.get("/")
 async def root():
-    return {"message": "Hello World"}
+    return {"message": "FinançasPro API"}
 
-@api_router.post("/status", response_model=StatusCheck)
-async def create_status_check(input: StatusCheckCreate):
-    status_dict = input.model_dump()
-    status_obj = StatusCheck(**status_dict)
-    
-    # Convert to dict and serialize datetime to ISO string for MongoDB
-    doc = status_obj.model_dump()
-    doc['timestamp'] = doc['timestamp'].isoformat()
-    
-    _ = await db.status_checks.insert_one(doc)
-    return status_obj
-
-@api_router.get("/status", response_model=List[StatusCheck])
-async def get_status_checks():
-    # Exclude MongoDB's _id field from the query results
-    status_checks = await db.status_checks.find({}, {"_id": 0}).to_list(1000)
-    
-    # Convert ISO string timestamps back to datetime objects
-    for check in status_checks:
-        if isinstance(check['timestamp'], str):
-            check['timestamp'] = datetime.fromisoformat(check['timestamp'])
-    
-    return status_checks
-
-# Include the router in the main app
+# Include router
 app.include_router(api_router)
 
+# CORS
 app.add_middleware(
     CORSMiddleware,
+    allow_origins=[os.environ.get("FRONTEND_URL", "http://localhost:3000"), "http://localhost:3000"],
     allow_credentials=True,
-    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
+# --- Startup ---
+@app.on_event("startup")
+async def startup():
+    await db.users.create_index("email", unique=True)
+    await db.transactions.create_index([("user_id", 1), ("date", -1)])
+    await db.goals.create_index([("user_id", 1)])
+    await db.login_attempts.create_index("identifier")
+    # Admin seed
+    admin_email = os.environ.get("ADMIN_EMAIL", "admin@financaspro.com").lower()
+    admin_password = os.environ.get("ADMIN_PASSWORD", "admin123")
+    existing = await db.users.find_one({"email": admin_email})
+    if not existing:
+        await db.users.insert_one({
+            "id": str(uuid.uuid4()),
+            "email": admin_email,
+            "password_hash": hash_password(admin_password),
+            "role": "admin",
+            "created_at": datetime.now(timezone.utc).isoformat(),
+        })
+        logger.info(f"Admin user seeded: {admin_email}")
+    elif not verify_password(admin_password, existing["password_hash"]):
+        await db.users.update_one({"email": admin_email}, {"$set": {"password_hash": hash_password(admin_password)}})
+
 @app.on_event("shutdown")
-async def shutdown_db_client():
+async def shutdown():
     client.close()
