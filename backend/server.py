@@ -200,7 +200,7 @@ async def login(body: LoginBody, request: Request, response: Response):
     return {"id": user["id"], "email": email, "role": user.get("role", "user"), "created_at": user["created_at"]}
 
 @api_router.post("/auth/logout")
-async def logout(response: Response, _: dict = Depends(get_current_user)):
+async def logout(response: Response):
     clear_auth_cookies(response)
     return {"ok": True}
 
