@@ -293,6 +293,118 @@ async def delete_goal(goal_id: str, user: dict = Depends(get_current_user)):
     if r.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Meta não encontrada")
     return {"ok": True}
+# --- Bills (Contas Fixas) ---
+class BillCreate(BaseModel):
+    name: str = Field(min_length=1)
+    value: float = Field(gt=0)
+    category: str
+    due_day: int = Field(ge=1, le=31)
+    emoji: str = "💰"
+
+class Bill(BaseModel):
+    id: str
+    user_id: str
+    name: str
+    value: float
+    category: str
+    due_day: int
+    emoji: str
+    created_at: datetime
+
+class BillPayment(BaseModel):
+    id: str
+    bill_id: str
+    user_id: str
+    month: str  # formato: "2026-04"
+    paid_at: datetime
+
+@api_router.get("/bills")
+async def list_bills(user: dict = Depends(get_current_user)):
+    items = await db.bills.find({"user_id": user["id"]}, {"_id": 0}).sort("due_day", 1).to_list(500)
+    return items
+
+@api_router.post("/bills")
+async def create_bill(body: BillCreate, user: dict = Depends(get_current_user)):
+    doc = {
+        "id": str(uuid.uuid4()),
+        "user_id": user["id"],
+        "name": body.name,
+        "value": float(body.value),
+        "category": body.category,
+        "due_day": body.due_day,
+        "emoji": body.emoji or "💰",
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.bills.insert_one(doc)
+    doc.pop("_id", None)
+    return doc
+
+@api_router.delete("/bills/{bill_id}")
+async def delete_bill(bill_id: str, user: dict = Depends(get_current_user)):
+    r = await db.bills.delete_one({"id": bill_id, "user_id": user["id"]})
+    if r.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Conta não encontrada")
+    await db.bill_payments.delete_many({"bill_id": bill_id, "user_id": user["id"]})
+    return {"ok": True}
+
+@api_router.get("/bills/payments")
+async def list_payments(month: str, user: dict = Depends(get_current_user)):
+    items = await db.bill_payments.find(
+        {"user_id": user["id"], "month": month}, {"_id": 0}
+    ).to_list(500)
+    return items
+
+@api_router.post("/bills/{bill_id}/pay")
+async def pay_bill(bill_id: str, user: dict = Depends(get_current_user)):
+    bill = await db.bills.find_one({"id": bill_id, "user_id": user["id"]}, {"_id": 0})
+    if not bill:
+        raise HTTPException(status_code=404, detail="Conta não encontrada")
+    
+    now = datetime.now(timezone.utc)
+    month = now.strftime("%Y-%m")
+    
+    existing = await db.bill_payments.find_one({
+        "bill_id": bill_id, "user_id": user["id"], "month": month
+    })
+    if existing:
+        raise HTTPException(status_code=400, detail="Conta já paga neste mês")
+    
+    payment = {
+        "id": str(uuid.uuid4()),
+        "bill_id": bill_id,
+        "user_id": user["id"],
+        "month": month,
+        "paid_at": now.isoformat(),
+    }
+    await db.bill_payments.insert_one(payment)
+    payment.pop("_id", None)
+    
+    # Cria transação automática no Quest Log
+    tx = {
+        "id": str(uuid.uuid4()),
+        "user_id": user["id"],
+        "type": "despesa",
+        "description": f"{bill['emoji']} {bill['name']}",
+        "value": float(bill["value"]),
+        "category": bill["category"],
+        "date": now.strftime("%Y-%m-%d"),
+        "created_at": now.isoformat(),
+    }
+    await db.transactions.insert_one(tx)
+    tx.pop("_id", None)
+    
+    return {"payment": payment, "transaction": tx}
+
+@api_router.delete("/bills/{bill_id}/pay")
+async def unpay_bill(bill_id: str, user: dict = Depends(get_current_user)):
+    now = datetime.now(timezone.utc)
+    month = now.strftime("%Y-%m")
+    r = await db.bill_payments.delete_one({
+        "bill_id": bill_id, "user_id": user["id"], "month": month
+    })
+    if r.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Pagamento não encontrado")
+    return {"ok": True}
 
 # --- Health ---
 @api_router.get("/")
@@ -321,6 +433,8 @@ async def startup():
     await db.transactions.create_index([("user_id", 1), ("date", -1)])
     await db.goals.create_index([("user_id", 1)])
     await db.login_attempts.create_index("identifier")
+    await db.bills.create_index([("user_id", 1)])
+    await db.bill_payments.create_index([("user_id", 1), ("month", 1)])
     # Admin seed
     admin_email = os.environ.get("ADMIN_EMAIL", "admin@financaspro.com").lower()
     admin_password = os.environ.get("ADMIN_PASSWORD", "admin123")
