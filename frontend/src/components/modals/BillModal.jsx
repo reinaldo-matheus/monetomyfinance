@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import Modal from "@/components/Modal";
-import { EXPENSE_CATEGORIES, GOAL_EMOJIS } from "@/lib/format";
+import { EXPENSE_CATEGORIES } from "@/lib/format";
 
-export default function BillModal({ open, onClose, onSubmit }) {
+export default function BillModal({ open, onClose, onSubmit, editingBill }) {
     const [name, setName] = useState("");
     const [emoji, setEmoji] = useState("💰");
     const [value, setValue] = useState("");
@@ -10,12 +10,22 @@ export default function BillModal({ open, onClose, onSubmit }) {
     const [dueDay, setDueDay] = useState("1");
     const [loading, setLoading] = useState(false);
 
+    const isEditing = !!editingBill;
+
     useEffect(() => {
         if (open) {
-            setName(""); setEmoji("💰"); setValue("");
-            setCategory(EXPENSE_CATEGORIES[0]); setDueDay("1");
+            if (editingBill) {
+                setName(editingBill.name);
+                setEmoji(editingBill.emoji);
+                setValue(String(editingBill.value));
+                setCategory(editingBill.category);
+                setDueDay(String(editingBill.due_day));
+            } else {
+                setName(""); setEmoji("💰"); setValue("");
+                setCategory(EXPENSE_CATEGORIES[0]); setDueDay("1");
+            }
         }
-    }, [open]);
+    }, [open, editingBill]);
 
     const submit = async (e) => {
         e.preventDefault();
@@ -30,10 +40,18 @@ export default function BillModal({ open, onClose, onSubmit }) {
         } finally { setLoading(false); }
     };
 
-    const BILL_EMOJIS = ["💰", "🏠", "💡", "📱", "🎓", "🚗", "💊", "📺", "🌊", "🔥"];
+    const BILL_EMOJIS = [
+        "💰", "🏠", "💡", "📱", "🎓", "📝", "📚", "🚗", "💊", "📺", "🌊", "🔥",
+        "🏦", "💳", "🛒", "✈️", "🎮", "🐾", "👶", "💈", "🎵", "⚡",
+        "🌐", "🔧", "🏋️", "🍔", "☕", "🧴", "👕", "📦", "🏥", "🚿"
+    ];
 
     return (
-        <Modal open={open} onClose={onClose} title="Nova Conta Fixa" testid="bill-modal">
+        <Modal
+            open={open} onClose={onClose}
+            title={isEditing ? "Editar Conta Fixa" : "Nova Conta Fixa"}
+            testid="bill-modal"
+        >
             <form onSubmit={submit} className="space-y-4">
                 <div>
                     <span className="label-hud mb-2 block">Ícone</span>
@@ -72,8 +90,11 @@ export default function BillModal({ open, onClose, onSubmit }) {
                     </select>
                 </Field>
                 <button type="submit" disabled={loading}
-                    className="btn-hud mt-2 flex w-full items-center justify-center gap-2 border border-hud-cyan bg-hud-cyan/10 px-6 py-3 text-xs text-hud-cyan transition-all hover:bg-hud-cyan hover:text-black hover:shadow-glow-cyan disabled:opacity-50">
-                    {loading ? "SALVANDO..." : "ADICIONAR CONTA"}
+                    className={`btn-hud mt-2 flex w-full items-center justify-center gap-2 border px-6 py-3 text-xs transition-all disabled:opacity-50 ${isEditing
+                            ? "border-hud-yellow bg-hud-yellow/10 text-hud-yellow hover:bg-hud-yellow hover:text-black"
+                            : "border-hud-cyan bg-hud-cyan/10 text-hud-cyan hover:bg-hud-cyan hover:text-black hover:shadow-glow-cyan"
+                        }`}>
+                    {loading ? "SALVANDO..." : isEditing ? "SALVAR ALTERAÇÕES" : "ADICIONAR CONTA"}
                 </button>
             </form>
         </Modal>

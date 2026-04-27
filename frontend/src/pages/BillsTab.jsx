@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { motion } from "framer-motion";
-import { Trash2, Plus, CheckCircle, Circle, AlertTriangle } from "lucide-react";
+import { Trash2, Plus, CheckCircle, Circle, AlertTriangle, Pencil } from "lucide-react";
 import { api } from "@/lib/api";
 import { BRL } from "@/lib/format";
 import { useToast } from "@/context/ToastContext";
@@ -12,6 +12,7 @@ export default function BillsTab() {
     const [payments, setPayments] = useState([]);
     const [loading, setLoading] = useState(true);
     const [billModal, setBillModal] = useState(false);
+    const [editingBill, setEditingBill] = useState(null);
 
     const currentMonth = new Date().toISOString().slice(0, 7);
     const monthLabel = new Date().toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
@@ -70,6 +71,22 @@ export default function BillsTab() {
         fetchData();
     };
 
+    const handleEdit = async (data) => {
+        await api.put(`/bills/${editingBill.id}`, data);
+        show("Conta atualizada!");
+        fetchData();
+    };
+
+    const openEdit = (bill) => {
+        setEditingBill(bill);
+        setBillModal(true);
+    };
+
+    const closeModal = () => {
+        setBillModal(false);
+        setEditingBill(null);
+    };
+
     const pct = totalValue > 0 ? (paidValue / totalValue) * 100 : 0;
 
     if (loading) return (
@@ -93,12 +110,11 @@ export default function BillsTab() {
                             {BRL(paidValue)} <span className="text-hud-muted text-lg">/ {BRL(totalValue)}</span>
                         </div>
                     </div>
-                    <button onClick={() => setBillModal(true)}
+                    <button onClick={() => { setEditingBill(null); setBillModal(true); }}
                         className="btn-hud flex items-center gap-2 border border-hud-cyan bg-hud-cyan/10 px-4 py-2 text-xs text-hud-cyan transition-all hover:bg-hud-cyan hover:text-black hover:shadow-glow-cyan">
                         <Plus size={12} /> NOVA CONTA
                     </button>
                 </div>
-                {/* Barra de progresso */}
                 <div className="mb-1 flex justify-between font-mono-hud text-[10px] uppercase tracking-widest text-hud-muted">
                     <span>{bills.filter(b => paidIds.has(b.id)).length}/{bills.length} pagas</span>
                     <span>{pct.toFixed(0)}%</span>
@@ -119,7 +135,7 @@ export default function BillsTab() {
                     <p className="font-mono-hud text-xs uppercase tracking-widest text-hud-muted">
                         &gt; nenhuma conta fixa cadastrada
                     </p>
-                    <button onClick={() => setBillModal(true)}
+                    <button onClick={() => { setEditingBill(null); setBillModal(true); }}
                         className="btn-hud mt-4 border border-hud-cyan bg-hud-cyan/10 px-4 py-2 text-[11px] text-hud-cyan transition-all hover:bg-hud-cyan hover:text-black hover:shadow-glow-cyan">
                         ADICIONAR PRIMEIRA CONTA
                     </button>
@@ -162,10 +178,14 @@ export default function BillsTab() {
                                         </div>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-3">
+                                <div className="flex items-center gap-2">
                                     <span className="font-display font-bold" style={{ color }}>
                                         {BRL(bill.value)}
                                     </span>
+                                    <button onClick={() => openEdit(bill)}
+                                        className="border border-hud-border p-1.5 text-hud-muted transition-all hover:border-hud-yellow hover:text-hud-yellow">
+                                        <Pencil size={12} />
+                                    </button>
                                     <button onClick={() => handleDelete(bill.id)}
                                         className="border border-hud-border p-1.5 text-hud-muted transition-all hover:border-hud-pink hover:text-hud-pink">
                                         <Trash2 size={12} />
@@ -177,7 +197,12 @@ export default function BillsTab() {
                 </div>
             )}
 
-            <BillModal open={billModal} onClose={() => setBillModal(false)} onSubmit={handleAdd} />
+            <BillModal
+                open={billModal}
+                onClose={closeModal}
+                onSubmit={editingBill ? handleEdit : handleAdd}
+                editingBill={editingBill}
+            />
         </div>
     );
 }

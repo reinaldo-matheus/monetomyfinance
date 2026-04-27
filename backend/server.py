@@ -347,6 +347,24 @@ async def delete_bill(bill_id: str, user: dict = Depends(get_current_user)):
     await db.bill_payments.delete_many({"bill_id": bill_id, "user_id": user["id"]})
     return {"ok": True}
 
+@api_router.put("/bills/{bill_id}")
+async def update_bill(bill_id: str, body: BillCreate, user: dict = Depends(get_current_user)):
+    bill = await db.bills.find_one({"id": bill_id, "user_id": user["id"]})
+    if not bill:
+        raise HTTPException(status_code=404, detail="Conta não encontrada")
+    await db.bills.update_one(
+        {"id": bill_id, "user_id": user["id"]},
+        {"$set": {
+            "name": body.name,
+            "value": float(body.value),
+            "category": body.category,
+            "due_day": body.due_day,
+            "emoji": body.emoji or "💰",
+        }}
+    )
+    updated = await db.bills.find_one({"id": bill_id}, {"_id": 0})
+    return updated
+
 @api_router.get("/bills/payments")
 async def list_payments(month: str, user: dict = Depends(get_current_user)):
     items = await db.bill_payments.find(
