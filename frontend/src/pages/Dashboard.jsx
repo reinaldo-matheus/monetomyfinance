@@ -1,3 +1,4 @@
+import BillsTab from "@/pages/BillsTab";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import CountUp from "react-countup";
@@ -227,14 +228,14 @@ export default function Dashboard() {
             { id: "lista", label: "QUEST LOG" },
             { id: "graficos", label: "ANALYTICS" },
             { id: "metas", label: "QUESTS" },
+            { id: "contas", label: "CONTAS FIXAS" },
           ].map((t, i) => (
             <button
               key={t.id}
               data-testid={`tab-${t.id}-btn`}
               onClick={() => setTab(t.id)}
-              className={`btn-hud flex-1 border-r border-hud-border px-4 py-3 text-xs transition-all last:border-r-0 ${
-                tab === t.id ? "bg-hud-cyan text-black shadow-glow-cyan" : "text-hud-muted hover:text-hud-cyan"
-              }`}
+              className={`btn-hud flex-1 border-r border-hud-border px-4 py-3 text-xs transition-all last:border-r-0 ${tab === t.id ? "bg-hud-cyan text-black shadow-glow-cyan" : "text-hud-muted hover:text-hud-cyan"
+                }`}
             >{t.label}</button>
           ))}
         </div>
@@ -254,6 +255,7 @@ export default function Dashboard() {
           {tab === "metas" && (
             <MetasTab loading={loading} goals={goals} onDeposit={(g) => setDepositGoal(g)} onDelete={deleteGoal} onCreate={() => setGoalModal(true)} />
           )}
+          {tab === "contas" && <BillsTab />}
         </div>
       </main>
 
@@ -523,9 +525,9 @@ function GoalCard({ goal, onDeposit, onDelete }) {
           <div className="label-hud mt-2" style={{ color }}>// QUEST</div>
           <div className="font-heading mt-0.5 text-xl font-bold uppercase tracking-wider">{goal.name}</div>
           <div className="mt-1 font-mono-hud text-[10px] uppercase tracking-widest">
-            {done ? <span className="inline-flex items-center gap-1 text-hud-green"><Check size={11}/> completa</span>
-              : urgent ? <span className="inline-flex items-center gap-1 text-hud-pink"><Bell size={11}/> {d} dia(s) restantes</span>
-              : <span className="text-hud-muted">{d} dia(s) até {formatDateBR(goal.deadline)}</span>}
+            {done ? <span className="inline-flex items-center gap-1 text-hud-green"><Check size={11} /> completa</span>
+              : urgent ? <span className="inline-flex items-center gap-1 text-hud-pink"><Bell size={11} /> {d} dia(s) restantes</span>
+                : <span className="text-hud-muted">{d} dia(s) até {formatDateBR(goal.deadline)}</span>}
           </div>
         </div>
         <button
