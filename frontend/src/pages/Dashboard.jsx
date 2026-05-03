@@ -1,3 +1,4 @@
+import InstallmentsTab from "@/pages/InstallmentsTab";
 import BillsTab from "@/pages/BillsTab";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
@@ -229,6 +230,7 @@ export default function Dashboard() {
             { id: "graficos", label: "ANALYTICS" },
             { id: "metas", label: "QUESTS" },
             { id: "contas", label: "CONTAS FIXAS" },
+            { id: "parcelamentos", label: "PARCELAMENTOS" },
           ].map((t, i) => (
             <button
               key={t.id}
@@ -256,6 +258,7 @@ export default function Dashboard() {
             <MetasTab loading={loading} goals={goals} onDeposit={(g) => setDepositGoal(g)} onDelete={deleteGoal} onCreate={() => setGoalModal(true)} />
           )}
           {tab === "contas" && <BillsTab />}
+          {tab === "parcelamentos" && <InstallmentsTab />}
         </div>
       </main>
 
