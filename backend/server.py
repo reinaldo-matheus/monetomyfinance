@@ -424,6 +424,95 @@ async def unpay_bill(bill_id: str, user: dict = Depends(get_current_user)):
         raise HTTPException(status_code=404, detail="Pagamento não encontrado")
     return {"ok": True}
 
+# --- Installments (Parcelamentos) ---
+class InstallmentCreate(BaseModel):
+    name: str = Field(min_length=1)
+    emoji: str = "💳"
+    category: str
+    due_day: int = Field(ge=1, le=31)
+    total_installments: int = Field(ge=2)
+    installment_value: float = Field(gt=0)
+
+@api_router.get("/installments")
+async def list_installments(user: dict = Depends(get_current_user)):
+    items = await db.installments.find({"user_id": user["id"]}, {"_id": 0}).sort("created_at", -1).to_list(500)
+    return items
+
+@api_router.post("/installments")
+async def create_installment(body: InstallmentCreate, user: dict = Depends(get_current_user)):
+    doc = {
+        "id": str(uuid.uuid4()),
+        "user_id": user["id"],
+        "name": body.name,
+        "emoji": body.emoji or "💳",
+        "category": body.category,
+        "due_day": body.due_day,
+        "total_installments": body.total_installments,
+        "installment_value": float(body.installment_value),
+        "paid_installments": 0,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.installments.insert_one(doc)
+    doc.pop("_id", None)
+    return doc
+
+@api_router.put("/installments/{inst_id}")
+async def update_installment(inst_id: str, body: InstallmentCreate, user: dict = Depends(get_current_user)):
+    inst = await db.installments.find_one({"id": inst_id, "user_id": user["id"]})
+    if not inst:
+        raise HTTPException(status_code=404, detail="Parcelamento não encontrado")
+    await db.installments.update_one(
+        {"id": inst_id, "user_id": user["id"]},
+        {"$set": {
+            "name": body.name,
+            "emoji": body.emoji or "💳",
+            "category": body.category,
+            "due_day": body.due_day,
+            "total_installments": body.total_installments,
+            "installment_value": float(body.installment_value),
+        }}
+    )
+    updated = await db.installments.find_one({"id": inst_id}, {"_id": 0})
+    return updated
+
+@api_router.delete("/installments/{inst_id}")
+async def delete_installment(inst_id: str, user: dict = Depends(get_current_user)):
+    r = await db.installments.delete_one({"id": inst_id, "user_id": user["id"]})
+    if r.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Parcelamento não encontrado")
+    return {"ok": True}
+
+@api_router.post("/installments/{inst_id}/pay")
+async def pay_installment(inst_id: str, user: dict = Depends(get_current_user)):
+    inst = await db.installments.find_one({"id": inst_id, "user_id": user["id"]}, {"_id": 0})
+    if not inst:
+        raise HTTPException(status_code=404, detail="Parcelamento não encontrado")
+    if inst["paid_installments"] >= inst["total_installments"]:
+        raise HTTPException(status_code=400, detail="Parcelamento já quitado")
+
+    new_paid = inst["paid_installments"] + 1
+    await db.installments.update_one(
+        {"id": inst_id, "user_id": user["id"]},
+        {"$set": {"paid_installments": new_paid}}
+    )
+
+    now = datetime.now(timezone.utc)
+    tx = {
+        "id": str(uuid.uuid4()),
+        "user_id": user["id"],
+        "type": "despesa",
+        "description": f"{inst['emoji']} {inst['name']} ({new_paid}/{inst['total_installments']})",
+        "value": float(inst["installment_value"]),
+        "category": inst["category"],
+        "date": now.strftime("%Y-%m-%d"),
+        "created_at": now.isoformat(),
+    }
+    await db.transactions.insert_one(tx)
+    tx.pop("_id", None)
+
+    inst["paid_installments"] = new_paid
+    return {"installment": inst, "transaction": tx}
+
 # --- Health ---
 @api_router.get("/")
 async def root():
@@ -453,6 +542,7 @@ async def startup():
     await db.login_attempts.create_index("identifier")
     await db.bills.create_index([("user_id", 1)])
     await db.bill_payments.create_index([("user_id", 1), ("month", 1)])
+    await db.installments.create_index([("user_id", 1)])
     # Admin seed
     admin_email = os.environ.get("ADMIN_EMAIL", "admin@financaspro.com").lower()
     admin_password = os.environ.get("ADMIN_PASSWORD", "admin123")
