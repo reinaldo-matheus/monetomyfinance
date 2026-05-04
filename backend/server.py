@@ -513,6 +513,39 @@ async def pay_installment(inst_id: str, user: dict = Depends(get_current_user)):
     inst["paid_installments"] = new_paid
     return {"installment": inst, "transaction": tx}
 
+# --- Profile ---
+class ProfileUpdate(BaseModel):
+    display_name: str = Field(min_length=1, max_length=50)
+    monthly_income: float = Field(ge=0)
+    savings_goal_pct: float = Field(ge=0, le=100)
+
+@api_router.get("/profile")
+async def get_profile(user: dict = Depends(get_current_user)):
+    profile = await db.profiles.find_one({"user_id": user["id"]}, {"_id": 0})
+    if not profile:
+        return {
+            "user_id": user["id"],
+            "display_name": user["email"].split("@")[0],
+            "monthly_income": 0,
+            "savings_goal_pct": 20,
+        }
+    return profile
+
+@api_router.put("/profile")
+async def update_profile(body: ProfileUpdate, user: dict = Depends(get_current_user)):
+    doc = {
+        "user_id": user["id"],
+        "display_name": body.display_name,
+        "monthly_income": float(body.monthly_income),
+        "savings_goal_pct": float(body.savings_goal_pct),
+    }
+    await db.profiles.update_one(
+        {"user_id": user["id"]},
+        {"$set": doc},
+        upsert=True,
+    )
+    return doc
+
 # --- Health ---
 @api_router.get("/")
 async def root():
@@ -543,6 +576,7 @@ async def startup():
     await db.bills.create_index([("user_id", 1)])
     await db.bill_payments.create_index([("user_id", 1), ("month", 1)])
     await db.installments.create_index([("user_id", 1)])
+    await db.profiles.create_index("user_id", unique=True)
     # Admin seed
     admin_email = os.environ.get("ADMIN_EMAIL", "admin@financaspro.com").lower()
     admin_password = os.environ.get("ADMIN_PASSWORD", "admin123")
