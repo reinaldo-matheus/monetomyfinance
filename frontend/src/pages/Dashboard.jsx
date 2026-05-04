@@ -1,3 +1,4 @@
+import ProfileModal from "@/components/modals/ProfileModal";
 import InstallmentsTab from "@/pages/InstallmentsTab";
 import BillsTab from "@/pages/BillsTab";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -5,7 +6,7 @@ import { motion } from "framer-motion";
 import CountUp from "react-countup";
 import {
   Zap, TrendingUp, TrendingDown, Wallet, Plus, LogOut, AlertTriangle, Clock,
-  Trash2, Download, Printer, Cloud, CloudOff, Check, Bell, Crosshair, Target
+  Trash2, Download, Printer, Cloud, CloudOff, Check, Bell, Crosshair, Target, User
 } from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -35,13 +36,23 @@ export default function Dashboard() {
   const [txModal, setTxModal] = useState(false);
   const [goalModal, setGoalModal] = useState(false);
   const [depositGoal, setDepositGoal] = useState(null);
+  const [bills, setBills] = useState([]);
+  const [installments, setInstallments] = useState([]);
+  const [profileModal, setProfileModal] = useState(false);
 
   const fetchData = useCallback(async () => {
     setSyncing(true);
     try {
-      const [tx, g] = await Promise.all([api.get("/transactions"), api.get("/goals")]);
+      const [tx, g, b, inst] = await Promise.all([
+        api.get("/transactions"),
+        api.get("/goals"),
+        api.get("/bills"),
+        api.get("/installments"),
+      ]);
       setTransactions(tx.data || []);
       setGoals(g.data || []);
+      setBills(b.data || []);
+      setInstallments(inst.data || []);
     } catch { show("Erro ao carregar dados", "error"); }
     finally { setLoading(false); setSyncing(false); }
   }, [show]);
@@ -161,6 +172,10 @@ export default function Dashboard() {
             >
               <LogOut size={12} /> SAIR
             </button>
+            <button onClick={() => setProfileModal(true)}
+              className="btn-hud flex items-center gap-1.5 border border-hud-border bg-hud-surface px-3 py-1.5 text-[10px] text-hud-muted transition-all hover:border-hud-cyan hover:text-hud-cyan">
+              <User size={12} /> PERFIL
+            </button>
           </div>
         </div>
       </header>
@@ -265,6 +280,7 @@ export default function Dashboard() {
       <TransactionModal open={txModal} onClose={() => setTxModal(false)} onSubmit={addTransaction} />
       <GoalModal open={goalModal} onClose={() => setGoalModal(false)} onSubmit={addGoal} />
       <DepositModal open={!!depositGoal} goal={depositGoal} onClose={() => setDepositGoal(null)} onSubmit={depositGoalAction} />
+      <ProfileModal open={profileModal} onClose={() => setProfileModal(false)} bills={bills} installments={installments} />
     </div>
   );
 }
