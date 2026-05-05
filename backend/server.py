@@ -546,6 +546,21 @@ async def update_profile(body: ProfileUpdate, user: dict = Depends(get_current_u
     )
     return doc
 
+@api_router.delete("/installments/{inst_id}/pay")
+async def unpay_installment(inst_id: str, user: dict = Depends(get_current_user)):
+    inst = await db.installments.find_one({"id": inst_id, "user_id": user["id"]}, {"_id": 0})
+    if not inst:
+        raise HTTPException(status_code=404, detail="Parcelamento não encontrado")
+    if inst["paid_installments"] <= 0:
+        raise HTTPException(status_code=400, detail="Nenhuma parcela paga para desfazer")
+    new_paid = inst["paid_installments"] - 1
+    await db.installments.update_one(
+        {"id": inst_id, "user_id": user["id"]},
+        {"$set": {"paid_installments": new_paid}}
+    )
+    inst["paid_installments"] = new_paid
+    return inst
+
 # --- Health ---
 @api_router.get("/")
 async def root():

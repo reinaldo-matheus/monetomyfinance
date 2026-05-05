@@ -63,6 +63,17 @@ export default function InstallmentsTab({ onRefresh }) {
         }
     };
 
+    const handleUnpay = async (inst) => {
+        try {
+            await api.delete(`/installments/${inst.id}/pay`);
+            show(`↩ Parcela desfeita — ${inst.name}`);
+            fetchData();
+            if (onRefresh) onRefresh();
+        } catch (err) {
+            show(err.response?.data?.detail || "Erro ao desfazer", "error");
+        }
+    };
+
     const openEdit = (inst) => { setEditingInstallment(inst); setModal(true); };
     const closeModal = () => { setModal(false); setEditingInstallment(null); };
 
@@ -174,12 +185,20 @@ export default function InstallmentsTab({ onRefresh }) {
                                     <span className="font-mono-hud text-[10px] uppercase tracking-widest text-hud-muted">
                                         {pct.toFixed(0)}% · total {BRL(inst.total_installments * inst.installment_value)}
                                     </span>
-                                    {!done && (
-                                        <button onClick={() => handlePay(inst)}
-                                            className="btn-hud flex items-center gap-1.5 border border-hud-cyan bg-hud-cyan/10 px-3 py-1 text-[10px] text-hud-cyan transition-all hover:bg-hud-cyan hover:text-black hover:shadow-glow-cyan">
-                                            <CheckCircle size={10} /> PAGAR PARCELA {inst.paid_installments + 1}
-                                        </button>
-                                    )}
+                                    <div className="flex items-center gap-2">
+                                        {inst.paid_installments > 0 && (
+                                            <button onClick={() => handleUnpay(inst)}
+                                                className="btn-hud flex items-center gap-1.5 border border-hud-yellow bg-hud-yellow/10 px-3 py-1 text-[10px] text-hud-yellow transition-all hover:bg-hud-yellow hover:text-black">
+                                                ↩ DESFAZER
+                                            </button>
+                                        )}
+                                        {!done && (
+                                            <button onClick={() => handlePay(inst)}
+                                                className="btn-hud flex items-center gap-1.5 border border-hud-cyan bg-hud-cyan/10 px-3 py-1 text-[10px] text-hud-cyan transition-all hover:bg-hud-cyan hover:text-black hover:shadow-glow-cyan">
+                                                <CheckCircle size={10} /> PAGAR PARCELA {inst.paid_installments + 1}
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
                             </motion.div>
                         );
