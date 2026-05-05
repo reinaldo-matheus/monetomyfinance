@@ -1,17 +1,21 @@
+import CurrencyInput from "@/components/CurrencyInput";
 import { useEffect, useState } from "react";
 import Modal from "@/components/Modal";
-import { EXPENSE_CATEGORIES } from "@/lib/format";
-import CurrencyInput from "@/components/CurrencyInput";
+import { EXPENSE_CATEGORIES_PF, EXPENSE_CATEGORIES_PJ } from "@/lib/format";
+import { useProfileType } from "@/context/ProfileTypeContext";
 
 export default function BillModal({ open, onClose, onSubmit, editingBill }) {
     const [name, setName] = useState("");
     const [emoji, setEmoji] = useState("💰");
     const [value, setValue] = useState("");
-    const [category, setCategory] = useState(EXPENSE_CATEGORIES[0]);
+    const [category, setCategory] = useState("");
     const [dueDay, setDueDay] = useState("1");
     const [loading, setLoading] = useState(false);
 
     const isEditing = !!editingBill;
+
+    const { profileType } = useProfileType();
+    const EXPENSE_CATS = profileType === "pj" ? EXPENSE_CATEGORIES_PJ : EXPENSE_CATEGORIES_PF;
 
     useEffect(() => {
         if (open) {
@@ -23,10 +27,11 @@ export default function BillModal({ open, onClose, onSubmit, editingBill }) {
                 setDueDay(String(editingBill.due_day));
             } else {
                 setName(""); setEmoji("💰"); setValue("");
-                setCategory(EXPENSE_CATEGORIES[0]); setDueDay("1");
+                setCategory(EXPENSE_CATS[0]); setDueDay("1");
             }
         }
-    }, [open, editingBill]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [open, editingBill, profileType]);
 
     const submit = async (e) => {
         e.preventDefault();
@@ -88,7 +93,7 @@ export default function BillModal({ open, onClose, onSubmit, editingBill }) {
                 <Field label="Categoria">
                     <select value={category} onChange={(e) => setCategory(e.target.value)}
                         className={fieldCls}>
-                        {EXPENSE_CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                        {EXPENSE_CATS.map((c) => <option key={c} value={c}>{c}</option>)}
                     </select>
                 </Field>
                 <button type="submit" disabled={loading}

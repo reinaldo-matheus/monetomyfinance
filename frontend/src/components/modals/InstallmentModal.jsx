@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import Modal from "@/components/Modal";
-import { EXPENSE_CATEGORIES } from "@/lib/format";
+import { EXPENSE_CATEGORIES_PF, EXPENSE_CATEGORIES_PJ } from "@/lib/format";
+import { useProfileType } from "@/context/ProfileTypeContext";
 import CurrencyInput from "@/components/CurrencyInput";
 
 export default function InstallmentModal({ open, onClose, onSubmit, editingInstallment }) {
     const [name, setName] = useState("");
     const [emoji, setEmoji] = useState("💳");
-    const [category, setCategory] = useState(EXPENSE_CATEGORIES[0]);
+    const [category, setCategory] = useState("");
     const [dueDay, setDueDay] = useState("1");
     const [mode, setMode] = useState("parcela"); // "parcela" ou "total"
     const [installmentValue, setInstallmentValue] = useState("");
@@ -15,6 +16,9 @@ export default function InstallmentModal({ open, onClose, onSubmit, editingInsta
     const [loading, setLoading] = useState(false);
 
     const isEditing = !!editingInstallment;
+
+    const { profileType } = useProfileType();
+    const EXPENSE_CATS = profileType === "pj" ? EXPENSE_CATEGORIES_PJ : EXPENSE_CATEGORIES_PF;
 
     useEffect(() => {
         if (open) {
@@ -27,7 +31,7 @@ export default function InstallmentModal({ open, onClose, onSubmit, editingInsta
                 setTotalInstallments(String(editingInstallment.total_installments));
                 setMode("parcela");
             } else {
-                setName(""); setEmoji("💳"); setCategory(EXPENSE_CATEGORIES[0]);
+                setName(""); setEmoji("💳"); setCategory(EXPENSE_CATS[0]);
                 setDueDay("1"); setInstallmentValue(""); setTotalValue("");
                 setTotalInstallments(""); setMode("parcela");
             }
@@ -158,7 +162,7 @@ export default function InstallmentModal({ open, onClose, onSubmit, editingInsta
                     <Field label="Categoria">
                         <select value={category} onChange={(e) => setCategory(e.target.value)}
                             className={fieldCls}>
-                            {EXPENSE_CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                            {EXPENSE_CATS.map((c) => <option key={c} value={c}>{c}</option>)}
                         </select>
                     </Field>
                 </div>
