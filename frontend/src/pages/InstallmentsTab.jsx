@@ -6,7 +6,7 @@ import { BRL } from "@/lib/format";
 import { useToast } from "@/context/ToastContext";
 import InstallmentModal from "@/components/modals/InstallmentModal";
 
-export default function InstallmentsTab() {
+export default function InstallmentsTab({ onRefresh }) {
     const { show } = useToast();
     const [installments, setInstallments] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -57,6 +57,7 @@ export default function InstallmentsTab() {
             await api.post(`/installments/${inst.id}/pay`);
             show(`${inst.emoji} Parcela ${inst.paid_installments + 1}/${inst.total_installments} paga!`);
             fetchData();
+            if (onRefresh) onRefresh(); // ← adiciona essa linha
         } catch (err) {
             show(err.response?.data?.detail || "Erro ao pagar parcela", "error");
         }

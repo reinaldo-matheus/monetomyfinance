@@ -6,7 +6,7 @@ import { BRL } from "@/lib/format";
 import { useToast } from "@/context/ToastContext";
 import BillModal from "@/components/modals/BillModal";
 
-export default function BillsTab() {
+export default function BillsTab({ onRefresh }) {
     const { show } = useToast();
     const [bills, setBills] = useState([]);
     const [payments, setPayments] = useState([]);
@@ -44,6 +44,7 @@ export default function BillsTab() {
             await api.post(`/bills/${bill.id}/pay`);
             show(`${bill.emoji} ${bill.name} pago! Transação criada.`);
             fetchData();
+            if (onRefresh) onRefresh(); // ← adiciona essa linha
         } catch (err) {
             show(err.response?.data?.detail || "Erro ao pagar", "error");
         }

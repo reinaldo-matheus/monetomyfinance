@@ -272,8 +272,8 @@ export default function Dashboard() {
           {tab === "metas" && (
             <MetasTab loading={loading} goals={goals} onDeposit={(g) => setDepositGoal(g)} onDelete={deleteGoal} onCreate={() => setGoalModal(true)} />
           )}
-          {tab === "contas" && <BillsTab />}
-          {tab === "parcelamentos" && <InstallmentsTab />}
+          {tab === "contas" && <BillsTab onRefresh={fetchData} />}
+          {tab === "parcelamentos" && <InstallmentsTab onRefresh={fetchData} />}
         </div>
       </main>
 
