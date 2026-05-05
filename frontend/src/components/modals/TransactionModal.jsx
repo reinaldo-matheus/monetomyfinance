@@ -1,28 +1,35 @@
 import { useEffect, useState } from "react";
 import Modal from "@/components/Modal";
-import { INCOME_CATEGORIES, EXPENSE_CATEGORIES, todayISO } from "@/lib/format";
+import { INCOME_CATEGORIES_PF, INCOME_CATEGORIES_PJ, EXPENSE_CATEGORIES_PF, EXPENSE_CATEGORIES_PJ, todayISO } from "@/lib/format";
 import CurrencyInput from "@/components/CurrencyInput";
 
-export default function TransactionModal({ open, onClose, onSubmit }) {
+export default function TransactionModal({ open, onClose, onSubmit, profileType = "pf" }) {
   const [type, setType] = useState("despesa");
   const [description, setDescription] = useState("");
   const [value, setValue] = useState("");
-  const [category, setCategory] = useState(EXPENSE_CATEGORIES[0]);
+  const [category, setCategory] = useState("");
   const [date, setDate] = useState(todayISO());
   const [loading, setLoading] = useState(false);
+
+  const INCOME_CATS = profileType === "pj" ? INCOME_CATEGORIES_PJ : INCOME_CATEGORIES_PF;
+  const EXPENSE_CATS = profileType === "pj" ? EXPENSE_CATEGORIES_PJ : EXPENSE_CATEGORIES_PF;
+  const cats = type === "receita" ? INCOME_CATS : EXPENSE_CATS;
 
   useEffect(() => {
     if (open) {
       setType("despesa");
       setDescription("");
       setValue("");
-      setCategory(EXPENSE_CATEGORIES[0]);
+      setCategory(EXPENSE_CATS[0]);
       setDate(todayISO());
     }
-  }, [open]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, profileType]);
 
-  const cats = type === "receita" ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
-  const switchType = (t) => { setType(t); setCategory(t === "receita" ? INCOME_CATEGORIES[0] : EXPENSE_CATEGORIES[0]); };
+  const switchType = (t) => {
+    setType(t);
+    setCategory(t === "receita" ? INCOME_CATS[0] : EXPENSE_CATS[0]);
+  };
 
   const submit = async (e) => {
     e.preventDefault();
@@ -44,8 +51,7 @@ export default function TransactionModal({ open, onClose, onSubmit }) {
             const col = t === "receita" ? "hud-green" : "hud-pink";
             return (
               <button
-                key={t}
-                type="button"
+                key={t} type="button"
                 data-testid={`tx-type-${t}-btn`}
                 onClick={() => switchType(t)}
                 className={`btn-hud flex-1 px-4 py-2.5 text-xs transition-all ${isActive
@@ -71,10 +77,8 @@ export default function TransactionModal({ open, onClose, onSubmit }) {
           <Field label="Valor (CR)">
             <CurrencyInput
               testid="tx-value-input"
-              value={value}
-              onChange={setValue}
-              required
-              className={fieldCls}
+              value={value} onChange={setValue}
+              required className={fieldCls}
             />
           </Field>
           <Field label="Data">
@@ -92,6 +96,15 @@ export default function TransactionModal({ open, onClose, onSubmit }) {
             {cats.map((c) => <option key={c} value={c}>{c}</option>)}
           </select>
         </Field>
+
+        {/* Badge modo ativo */}
+        <div className="flex items-center gap-2 font-mono-hud text-[10px] uppercase tracking-widest text-hud-muted">
+          <span>// modo:</span>
+          <span className={`border px-2 py-0.5 font-bold ${profileType === "pj" ? "border-hud-purple text-hud-purple" : "border-hud-cyan text-hud-cyan"}`}>
+            {profileType === "pj" ? "🏢 pessoa jurídica" : "👤 pessoa física"}
+          </span>
+        </div>
+
         <button
           type="submit" data-testid="tx-submit-btn" disabled={loading}
           className="btn-hud mt-2 flex w-full items-center justify-center gap-2 border border-hud-cyan bg-hud-cyan/10 px-6 py-3 text-xs text-hud-cyan transition-all hover:bg-hud-cyan hover:text-black hover:shadow-glow-cyan disabled:opacity-50"
@@ -103,8 +116,7 @@ export default function TransactionModal({ open, onClose, onSubmit }) {
   );
 }
 
-const fieldCls =
-  "w-full border border-hud-border bg-hud-bg px-3 py-2.5 font-mono-hud text-sm text-hud-text outline-none transition-all placeholder:text-hud-dim focus:border-hud-cyan focus:shadow-glow-cyan";
+const fieldCls = "w-full border border-hud-border bg-hud-bg px-3 py-2.5 font-mono-hud text-sm text-hud-text outline-none transition-all placeholder:text-hud-dim focus:border-hud-cyan focus:shadow-glow-cyan";
 
 function Field({ label, children }) {
   return (

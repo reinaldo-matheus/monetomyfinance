@@ -1,5 +1,8 @@
 export const BRL = (n) =>
-  (Number(n) || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  (Number(n) || 0).toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  });
 
 export const formatDateBR = (iso) => {
   if (!iso) return "";
@@ -25,20 +28,93 @@ export const monthKey = (iso) => (iso ? iso.slice(0, 7) : "");
 
 export const monthLabelBR = (key) => {
   const [y, m] = key.split("-").map(Number);
-  const names = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+  const names = [
+    "Jan",
+    "Fev",
+    "Mar",
+    "Abr",
+    "Mai",
+    "Jun",
+    "Jul",
+    "Ago",
+    "Set",
+    "Out",
+    "Nov",
+    "Dez",
+  ];
   return `${names[m - 1]}/${String(y).slice(2)}`;
 };
 
-export const INCOME_CATEGORIES = ["Salário", "Freelance", "Investimentos", "Outros"];
-export const EXPENSE_CATEGORIES = ["Moradia", "Alimentação", "Transporte", "Saúde", "Lazer", "Educação", "Outros"];
-export const GOAL_EMOJIS = ["🎯", "🏠", "✈️", "🚗", "📱", "🎓", "💍", "🛡️", "💻", "🌴"];
+export const INCOME_CATEGORIES_PF = [
+  "Salário",
+  "Freelance",
+  "Investimentos",
+  "Outros",
+];
+export const INCOME_CATEGORIES_PJ = [
+  "Faturamento",
+  "Prestação de Serviço",
+  "Investimentos",
+  "Outros",
+];
+
+export const EXPENSE_CATEGORIES_PF = [
+  "Moradia",
+  "Aluguel",
+  "IPTU",
+  "Alimentação",
+  "Transporte",
+  "Saúde",
+  "Lazer",
+  "Educação",
+  "Outros",
+];
+
+export const EXPENSE_CATEGORIES_PJ = [
+  "Moradia",
+  "Aluguel",
+  "IPTU",
+  "Alimentação",
+  "Transporte",
+  "Saúde",
+  "Educação",
+  "Prestação de Serviço",
+  "Despesas Diversas",
+  "Obras e Reformas",
+  "Manutenção de Equipamentos",
+  "Material de Construção",
+  "Outros",
+];
+
+// Retrocompatibilidade — mantém os nomes antigos apontando para PF
+export const INCOME_CATEGORIES = INCOME_CATEGORIES_PF;
+export const EXPENSE_CATEGORIES = EXPENSE_CATEGORIES_PF;
+export const GOAL_EMOJIS = [
+  "🎯",
+  "🏠",
+  "✈️",
+  "🚗",
+  "📱",
+  "🎓",
+  "💍",
+  "🛡️",
+  "💻",
+  "🌴",
+];
 
 export const CATEGORY_COLORS = {
-  "Moradia": "#00F0FF",
-  "Alimentação": "#FF0055",
-  "Transporte": "#B026FF",
-  "Saúde": "#39FF14",
-  "Lazer": "#FFB800",
-  "Educação": "#00B4A8",
-  "Outros": "#52525B",
+  Moradia: "#00F0FF",
+  Aluguel: "#00F0FF",
+  IPTU: "#00D4E0",
+  Alimentação: "#FF0055",
+  Transporte: "#B026FF",
+  Saúde: "#39FF14",
+  Lazer: "#FFB800",
+  Educação: "#00B4A8",
+  "Prestação de Serviço": "#B026FF",
+  "Despesas Diversas": "#FFB800",
+  "Obras e Reformas": "#FF6B35",
+  "Manutenção de Equipamentos": "#FF9500",
+  "Material de Construção": "#8B7355",
+  Outros: "#52525B",
 };

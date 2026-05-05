@@ -1,3 +1,4 @@
+import { useProfileType } from "@/context/ProfileTypeContext";
 import ProfileModal from "@/components/modals/ProfileModal";
 import InstallmentsTab from "@/pages/InstallmentsTab";
 import BillsTab from "@/pages/BillsTab";
@@ -25,7 +26,7 @@ import DepositModal from "@/components/modals/DepositModal";
 export default function Dashboard() {
   const { user, logout } = useAuth();
   const { show } = useToast();
-
+  const { profileType, toggle } = useProfileType();
   const [transactions, setTransactions] = useState([]);
   const [goals, setGoals] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -166,6 +167,22 @@ export default function Dashboard() {
               {syncing ? "SYNCING" : "SYNCED"}
             </div>
             <span className="hidden font-mono-hud text-[11px] text-hud-muted md:inline" data-testid="header-user-email">{user?.email}</span>
+            <div className="flex border border-hud-border bg-hud-bg">
+              {["pf", "pj"].map((type) => (
+                <button
+                  key={type}
+                  onClick={() => toggle(type)}
+                  className={`btn-hud px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest transition-all ${profileType === type
+                    ? type === "pf"
+                      ? "bg-hud-cyan text-black shadow-glow-cyan"
+                      : "bg-hud-purple text-white shadow-glow-purple"
+                    : "text-hud-muted hover:text-hud-cyan"
+                    }`}
+                >
+                  {type === "pf" ? "👤 PF" : "🏢 PJ"}
+                </button>
+              ))}
+            </div>
             <button
               data-testid="logout-btn" onClick={logout}
               className="btn-hud flex items-center gap-1.5 border border-hud-border bg-hud-surface px-3 py-1.5 text-[10px] text-hud-muted transition-all hover:border-hud-pink hover:text-hud-pink"
@@ -277,7 +294,7 @@ export default function Dashboard() {
         </div>
       </main>
 
-      <TransactionModal open={txModal} onClose={() => setTxModal(false)} onSubmit={addTransaction} />
+      <TransactionModal open={txModal} onClose={() => setTxModal(false)} onSubmit={addTransaction} profileType={profileType} />
       <GoalModal open={goalModal} onClose={() => setGoalModal(false)} onSubmit={addGoal} />
       <DepositModal open={!!depositGoal} goal={depositGoal} onClose={() => setDepositGoal(null)} onSubmit={depositGoalAction} />
       <ProfileModal open={profileModal} onClose={() => setProfileModal(false)} bills={bills} installments={installments} />
