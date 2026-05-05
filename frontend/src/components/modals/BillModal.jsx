@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Modal from "@/components/Modal";
 import { EXPENSE_CATEGORIES } from "@/lib/format";
+import CurrencyInput from "@/components/CurrencyInput";
 
 export default function BillModal({ open, onClose, onSubmit, editingBill }) {
     const [name, setName] = useState("");
@@ -60,8 +61,8 @@ export default function BillModal({ open, onClose, onSubmit, editingBill }) {
                             <button type="button" key={em}
                                 onClick={() => setEmoji(em)}
                                 className={`flex h-10 w-10 items-center justify-center border text-xl transition-all ${emoji === em
-                                        ? "border-hud-cyan bg-hud-cyan/10 shadow-glow-cyan scale-110"
-                                        : "border-hud-border bg-hud-bg hover:border-hud-muted"
+                                    ? "border-hud-cyan bg-hud-cyan/10 shadow-glow-cyan scale-110"
+                                    : "border-hud-border bg-hud-bg hover:border-hud-muted"
                                     }`}
                             >{em}</button>
                         ))}
@@ -73,9 +74,10 @@ export default function BillModal({ open, onClose, onSubmit, editingBill }) {
                 </Field>
                 <div className="grid grid-cols-2 gap-3">
                     <Field label="Valor (CR)">
-                        <input type="number" step="0.01" min="0.01" required
-                            value={value} onChange={(e) => setValue(e.target.value)}
-                            placeholder="0,00" className={fieldCls} />
+                        <CurrencyInput
+                            value={value} onChange={setValue}
+                            required className={fieldCls}
+                        />
                     </Field>
                     <Field label="Dia do vencimento">
                         <input type="number" min="1" max="31" required
@@ -91,8 +93,8 @@ export default function BillModal({ open, onClose, onSubmit, editingBill }) {
                 </Field>
                 <button type="submit" disabled={loading}
                     className={`btn-hud mt-2 flex w-full items-center justify-center gap-2 border px-6 py-3 text-xs transition-all disabled:opacity-50 ${isEditing
-                            ? "border-hud-yellow bg-hud-yellow/10 text-hud-yellow hover:bg-hud-yellow hover:text-black"
-                            : "border-hud-cyan bg-hud-cyan/10 text-hud-cyan hover:bg-hud-cyan hover:text-black hover:shadow-glow-cyan"
+                        ? "border-hud-yellow bg-hud-yellow/10 text-hud-yellow hover:bg-hud-yellow hover:text-black"
+                        : "border-hud-cyan bg-hud-cyan/10 text-hud-cyan hover:bg-hud-cyan hover:text-black hover:shadow-glow-cyan"
                         }`}>
                     {loading ? "SALVANDO..." : isEditing ? "SALVAR ALTERAÇÕES" : "ADICIONAR CONTA"}
                 </button>

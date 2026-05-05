@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Modal from "@/components/Modal";
 import { EXPENSE_CATEGORIES } from "@/lib/format";
+import CurrencyInput from "@/components/CurrencyInput";
 
 export default function InstallmentModal({ open, onClose, onSubmit, editingInstallment }) {
     const [name, setName] = useState("");
@@ -76,8 +77,8 @@ export default function InstallmentModal({ open, onClose, onSubmit, editingInsta
                         {EMOJIS.map((em) => (
                             <button type="button" key={em} onClick={() => setEmoji(em)}
                                 className={`flex h-10 w-10 items-center justify-center border text-xl transition-all ${emoji === em
-                                        ? "border-hud-cyan bg-hud-cyan/10 shadow-glow-cyan scale-110"
-                                        : "border-hud-border bg-hud-bg hover:border-hud-muted"
+                                    ? "border-hud-cyan bg-hud-cyan/10 shadow-glow-cyan scale-110"
+                                    : "border-hud-border bg-hud-bg hover:border-hud-muted"
                                     }`}>{em}</button>
                         ))}
                     </div>
@@ -99,8 +100,8 @@ export default function InstallmentModal({ open, onClose, onSubmit, editingInsta
                         ].map((m) => (
                             <button type="button" key={m.id} onClick={() => setMode(m.id)}
                                 className={`btn-hud flex-1 px-3 py-2 text-[10px] transition-all ${mode === m.id
-                                        ? "bg-hud-cyan text-black shadow-glow-cyan"
-                                        : "text-hud-muted hover:text-hud-cyan"
+                                    ? "bg-hud-cyan text-black shadow-glow-cyan"
+                                    : "text-hud-muted hover:text-hud-cyan"
                                     }`}>{m.label.toUpperCase()}</button>
                         ))}
                     </div>
@@ -110,15 +111,17 @@ export default function InstallmentModal({ open, onClose, onSubmit, editingInsta
                 <div className="grid grid-cols-2 gap-3">
                     {mode === "parcela" ? (
                         <Field label="Valor da parcela (CR)">
-                            <input type="number" step="0.01" min="0.01" required
-                                value={installmentValue} onChange={(e) => setInstallmentValue(e.target.value)}
-                                placeholder="0,00" className={fieldCls} />
+                            <CurrencyInput
+                                value={installmentValue} onChange={setInstallmentValue}
+                                required className={fieldCls}
+                            />
                         </Field>
                     ) : (
                         <Field label="Valor total (CR)">
-                            <input type="number" step="0.01" min="0.01" required
-                                value={totalValue} onChange={(e) => setTotalValue(e.target.value)}
-                                placeholder="0,00" className={fieldCls} />
+                            <CurrencyInput
+                                value={totalValue} onChange={setTotalValue}
+                                required className={fieldCls}
+                            />
                         </Field>
                     )}
                     <Field label="Nº de parcelas">
@@ -162,8 +165,8 @@ export default function InstallmentModal({ open, onClose, onSubmit, editingInsta
 
                 <button type="submit" disabled={loading}
                     className={`btn-hud mt-2 flex w-full items-center justify-center gap-2 border px-6 py-3 text-xs transition-all disabled:opacity-50 ${isEditing
-                            ? "border-hud-yellow bg-hud-yellow/10 text-hud-yellow hover:bg-hud-yellow hover:text-black"
-                            : "border-hud-purple bg-hud-purple/10 text-hud-purple hover:bg-hud-purple hover:text-white hover:shadow-glow-purple"
+                        ? "border-hud-yellow bg-hud-yellow/10 text-hud-yellow hover:bg-hud-yellow hover:text-black"
+                        : "border-hud-purple bg-hud-purple/10 text-hud-purple hover:bg-hud-purple hover:text-white hover:shadow-glow-purple"
                         }`}>
                     {loading ? "SALVANDO..." : isEditing ? "SALVAR ALTERAÇÕES" : "REGISTRAR PARCELAMENTO"}
                 </button>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Modal from "@/components/Modal";
 import { INCOME_CATEGORIES, EXPENSE_CATEGORIES, todayISO } from "@/lib/format";
+import CurrencyInput from "@/components/CurrencyInput";
 
 export default function TransactionModal({ open, onClose, onSubmit }) {
   const [type, setType] = useState("despesa");
@@ -47,13 +48,12 @@ export default function TransactionModal({ open, onClose, onSubmit }) {
                 type="button"
                 data-testid={`tx-type-${t}-btn`}
                 onClick={() => switchType(t)}
-                className={`btn-hud flex-1 px-4 py-2.5 text-xs transition-all ${
-                  isActive
-                    ? t === "receita"
-                      ? "bg-hud-green text-black shadow-glow-green"
-                      : "bg-hud-pink text-white shadow-glow-pink"
-                    : `text-hud-muted hover:text-${col}`
-                }`}
+                className={`btn-hud flex-1 px-4 py-2.5 text-xs transition-all ${isActive
+                  ? t === "receita"
+                    ? "bg-hud-green text-black shadow-glow-green"
+                    : "bg-hud-pink text-white shadow-glow-pink"
+                  : `text-hud-muted hover:text-${col}`
+                  }`}
               >
                 {t === "receita" ? "+ LOOT" : "− BURN"}
               </button>
@@ -69,9 +69,12 @@ export default function TransactionModal({ open, onClose, onSubmit }) {
         </Field>
         <div className="grid grid-cols-2 gap-3">
           <Field label="Valor (CR)">
-            <input
-              data-testid="tx-value-input" type="number" step="0.01" min="0.01" required
-              value={value} onChange={(e) => setValue(e.target.value)} placeholder="0,00" className={fieldCls}
+            <CurrencyInput
+              testid="tx-value-input"
+              value={value}
+              onChange={setValue}
+              required
+              className={fieldCls}
             />
           </Field>
           <Field label="Data">

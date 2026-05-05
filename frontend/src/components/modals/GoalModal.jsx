@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Modal from "@/components/Modal";
 import { GOAL_EMOJIS, todayISO } from "@/lib/format";
+import CurrencyInput from "@/components/CurrencyInput";
 
 export default function GoalModal({ open, onClose, onSubmit }) {
   const [name, setName] = useState("");
@@ -37,11 +38,10 @@ export default function GoalModal({ open, onClose, onSubmit }) {
               <button
                 type="button" key={em} data-testid={`goal-emoji-${em}`}
                 onClick={() => setEmoji(em)}
-                className={`flex h-11 w-11 items-center justify-center border text-xl transition-all ${
-                  emoji === em
+                className={`flex h-11 w-11 items-center justify-center border text-xl transition-all ${emoji === em
                     ? "border-hud-cyan bg-hud-cyan/10 shadow-glow-cyan scale-110"
                     : "border-hud-border bg-hud-bg hover:border-hud-muted"
-                }`}
+                  }`}
               >{em}</button>
             ))}
           </div>
@@ -55,12 +55,18 @@ export default function GoalModal({ open, onClose, onSubmit }) {
         </Field>
         <div className="grid grid-cols-2 gap-3">
           <Field label="Objetivo (CR)">
-            <input data-testid="goal-target-input" type="number" step="0.01" min="0.01" required
-              value={target} onChange={(e) => setTarget(e.target.value)} placeholder="0,00" className={fieldCls} />
+            <CurrencyInput
+              testid="goal-target-input"
+              value={target} onChange={setTarget}
+              required className={fieldCls}
+            />
           </Field>
           <Field label="XP inicial (CR)">
-            <input data-testid="goal-saved-input" type="number" step="0.01" min="0"
-              value={saved} onChange={(e) => setSaved(e.target.value)} placeholder="0,00" className={fieldCls} />
+            <CurrencyInput
+              testid="goal-saved-input"
+              value={saved} onChange={setSaved}
+              className={fieldCls}
+            />
           </Field>
         </div>
         <Field label="Prazo / Deadline">
