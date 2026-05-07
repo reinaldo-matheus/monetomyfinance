@@ -1,4 +1,4 @@
-# ⚡ MONETO — Command Center Financeiro
+# ⚡ MONETO My Finance
 
 > **"Domine suas finanças como uma Quest."**
 
