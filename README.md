@@ -199,9 +199,9 @@ REACT_APP_BACKEND_URL=http://localhost:8000
 
 ## 📸 Screenshots
 
-| Login                             | Control Center                             | Modo PF/PJ                                            |
-| --------------------------------- | ------------------------------------------ | ----------------------------------------------------- | ----------------------------------------- | --- | -------------------------------------- |
-| ![Login](./screenshots/login.png) | ![Dashboard](./screenshots/daschboard.png) | ![Modal de Entradas](./screenshots/modal-entrada.png) | ![Analytics](./screenshots/analytics.png) |     | ![Quests](./screenshots/quest-log.png) |
+| Login                             | Control Center                             | Registro de entradas                                  |   Gráficos para análise                   |  Quests                                |
+| --------------------------------- | ------------------------------------------ | ----------------------------------------------------- | ----------------------------------------- | -------------------------------------- |
+| ![Login](./screenshots/login.png) | ![Dashboard](./screenshots/daschboard.png) | ![Modal de Entradas](./screenshots/modal-entrada.png) | ![Analytics](./screenshots/analytics.png) | ![Quests](./screenshots/quest-log.png) |
 
 ---
 
