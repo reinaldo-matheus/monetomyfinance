@@ -22,43 +22,51 @@ A proposta é simples: transformar a gestão financeira em algo com a energia de
 ## ✨ Funcionalidades
 
 ### 🔐 Autenticação
+
 - Cadastro e login com email/senha
 - JWT híbrido: access token (1 dia) + refresh token (7 dias) via httpOnly cookies
 - Proteção contra brute force — bloqueio após 5 tentativas por IP+email
 - Isolamento total de dados por usuário
 
 ### 💹 Control Center (Dashboard)
+
 - Cards em tempo real: **LOOT** (entradas), **BURN** (saídas), **CRÉDITOS** (saldo)
 - Alertas **HUD-WARN** automáticos para metas próximas do prazo e saldo negativo
 - Indicador de sincronização em tempo real
 - Modo **👤 PF / 🏢 PJ** com categorias dinâmicas por perfil
 
 ### 📋 Quest Log (Transações)
+
 - Registro de receitas e despesas com categoria, data e valor
 - Filtros por tipo e por mês
 - Máscara de moeda BRL em tempo real via `CurrencyInput` reutilizável
 
 ### 📊 Analytics
+
 - **BarChart** mensal: Receitas vs Despesas
 - **PieChart**: distribuição de despesas por categoria com cores por categoria
 
 ### 🏆 Quests (Metas Financeiras)
+
 - Criação de metas com emoji, valor objetivo e prazo
 - Barra de XP com progresso dinâmico
 - Sistema de depósito parcial (**+ Depositar XP**)
 - Alerta automático quando o prazo está crítico (≤ 30 dias)
 
 ### 🧾 Contas Fixas
+
 - Checklist mensal com reset automático
 - Indicador de vencimento: urgente, em atraso, pago
 - Pagamento cria transação automática no Quest Log
 
 ### 💳 Parcelamentos
+
 - Controle de parcelas com barra de XP
 - Pagar e desfazer pagamento
 - Preview automático de valor total vs valor por parcela
 
 ### 📤 Exportação
+
 - **CSV** com BOM UTF-8 (compatível com Excel BR)
 - **PDF** gerado client-side sem dependências externas
 
@@ -66,23 +74,24 @@ A proposta é simples: transformar a gestão financeira em algo com a energia de
 
 ## 🛠️ Stack
 
-| Camada | Tecnologia |
-|---|---|
-| Frontend | React 19 + CRA + CRACO |
-| Backend | FastAPI + Uvicorn |
-| Banco de dados | MongoDB Atlas + Motor (async) |
-| Autenticação | JWT (PyJWT) + bcrypt |
-| Gráficos | Recharts |
-| Estilização | Tailwind CSS |
-| Ícones | Lucide React |
-| Deploy Frontend | Vercel |
-| Deploy Backend | Render |
+| Camada          | Tecnologia                    |
+| --------------- | ----------------------------- |
+| Frontend        | React 19 + CRA + CRACO        |
+| Backend         | FastAPI + Uvicorn             |
+| Banco de dados  | MongoDB Atlas + Motor (async) |
+| Autenticação    | JWT (PyJWT) + bcrypt          |
+| Gráficos        | Recharts                      |
+| Estilização     | Tailwind CSS                  |
+| Ícones          | Lucide React                  |
+| Deploy Frontend | Vercel                        |
+| Deploy Backend  | Render                        |
 
 ---
 
 ## 🧠 Decisões técnicas relevantes
 
 **JWT híbrido com httpOnly cookies**
+
 ```python
 # Access token curto + refresh token longo
 # Brute force protection por IP+email
@@ -93,6 +102,7 @@ async def check_lockout(identifier: str):
 ```
 
 **CurrencyInput reutilizável — princípio DRY**
+
 ```jsx
 // Toda a lógica de máscara BRL em um componente
 // Aplicado em 5 modais com uma linha cada
@@ -104,27 +114,29 @@ const handleChange = (e) => {
 ```
 
 **Context API para modo PF/PJ**
+
 ```jsx
 // Troca de modo = categorias atualizadas em todos os modais
 // Persistência automática no localStorage
 const { profileType } = useProfileType();
-const EXPENSE_CATS = profileType === "pj"
-  ? EXPENSE_CATEGORIES_PJ
-  : EXPENSE_CATEGORIES_PF;
+const EXPENSE_CATS =
+  profileType === "pj" ? EXPENSE_CATEGORIES_PJ : EXPENSE_CATEGORIES_PF;
 ```
 
 **useCallback + useEffect sem loop infinito**
+
 ```jsx
 const fetchData = useCallback(async () => { ... }, [show]);
 useEffect(() => { fetchData(); }, [fetchData]);
 ```
 
 **useMemo para valores derivados**
+
 ```jsx
 // Totais recalculados APENAS quando transactions muda
 const totals = useMemo(() => {
   const income = transactions
-    .filter(t => t.type === "receita")
+    .filter((t) => t.type === "receita")
     .reduce((a, b) => a + Number(b.value), 0);
   return { income, expense, balance: income - expense };
 }, [transactions]);
@@ -133,6 +145,7 @@ const totals = useMemo(() => {
 ---
 
 ## 🗄️ Modelagem
+
 ```jsx
 users
 ├── transactions  (type, description, value, category, date)
@@ -142,11 +155,13 @@ users
 ├── installments  (name, total_installments, paid_installments, installment_value)
 └── profiles      (display_name, monthly_income, savings_goal_pct)
 ```
+
 ---
 
 ## 🚀 Como rodar localmente
 
 ### Backend
+
 ```bash
 cd backend
 pip install -r requirements.txt
@@ -156,6 +171,7 @@ uvicorn server:app --reload
 ```
 
 ### Frontend
+
 ```bash
 cd frontend
 npm install --legacy-peer-deps
@@ -165,6 +181,7 @@ npm start
 ### Variáveis de ambiente
 
 **Backend `.env`**
+
 ```env
 MONGO_URL=mongodb+srv://...
 DB_NAME=moneto_db
@@ -173,6 +190,7 @@ FRONTEND_URL=http://localhost:3000
 ```
 
 **Frontend `.env`**
+
 ```env
 REACT_APP_BACKEND_URL=http://localhost:8000
 ```
@@ -181,9 +199,9 @@ REACT_APP_BACKEND_URL=http://localhost:8000
 
 ## 📸 Screenshots
 
-| Login | Control Center | Modo PF/PJ |
-|---|---|---|
-| ![Login](./screenshots/login.png) | ![Dashboard](./screenshots/dashboard.png) | ![PJ](./screenshots/pj.png) |
+| Login                             | Control Center                             | Modo PF/PJ                                            |
+| --------------------------------- | ------------------------------------------ | ----------------------------------------------------- | ----------------------------------------- | --- | -------------------------------------- |
+| ![Login](./screenshots/login.png) | ![Dashboard](./screenshots/daschboard.png) | ![Modal de Entradas](./screenshots/modal-entrada.png) | ![Analytics](./screenshots/analytics.png) |     | ![Quests](./screenshots/quest-log.png) |
 
 ---
 
