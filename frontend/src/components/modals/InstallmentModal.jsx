@@ -36,7 +36,7 @@ export default function InstallmentModal({ open, onClose, onSubmit, editingInsta
                 setTotalInstallments(""); setMode("parcela");
             }
         }
-    }, [open, editingInstallment]);
+    }, [open, editingInstallment, EXPENSE_CATS]);
 
     // Calcula valores derivados
     const computedInstallmentValue = mode === "total" && totalValue && totalInstallments
