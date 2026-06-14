@@ -185,7 +185,7 @@ export default function Dashboard() {
                   className={`btn-hud px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest transition-all ${profileType === type
                     ? type === "pf"
                       ? "bg-hud-cyan text-black shadow-glow-cyan"
-                      : "bg-hud-purple text-white shadow-glow-purple"
+                      : "bg-hud-indigo text-white shadow-glow-indigo"
                     : "text-hud-muted hover:text-hud-cyan"
                     }`}
                 >

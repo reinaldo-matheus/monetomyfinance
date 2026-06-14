@@ -27,6 +27,7 @@ module.exports = {
           dim: '#52525B',
           cyan: '#00F0FF',
           purple: '#B026FF',
+          indigo: '#5B5FFF',
           pink: '#FF0055',
           green: '#39FF14',
           yellow: '#FFB800'
@@ -48,6 +49,7 @@ module.exports = {
         'glow-cyan': '0 0 20px rgba(0, 240, 255, 0.45), inset 0 0 0 1px rgba(0,240,255,0.35)',
         'glow-pink': '0 0 20px rgba(255, 0, 85, 0.45), inset 0 0 0 1px rgba(255,0,85,0.35)',
         'glow-purple': '0 0 20px rgba(176, 38, 255, 0.45), inset 0 0 0 1px rgba(176,38,255,0.35)',
+        'glow-indigo': '0 0 20px rgba(91, 95, 255, 0.45), inset 0 0 0 1px rgba(91,95,255,0.35)',
         'glow-green': '0 0 18px rgba(57, 255, 20, 0.45), inset 0 0 0 1px rgba(57,255,20,0.35)'
       },
       keyframes: {

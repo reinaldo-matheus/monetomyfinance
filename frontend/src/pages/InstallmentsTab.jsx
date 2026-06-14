@@ -102,7 +102,7 @@ export default function InstallmentsTab({ onRefresh }) {
                         </div>
                     </div>
                     <button onClick={() => { setEditingInstallment(null); setModal(true); }}
-                        className="btn-hud flex items-center gap-2 border border-hud-purple bg-hud-purple/10 px-4 py-2 text-xs text-hud-purple transition-all hover:bg-hud-purple hover:text-white hover:shadow-glow-purple">
+                        className="btn-hud flex items-center gap-2 border border-hud-indigo bg-hud-indigo/10 px-4 py-2 text-xs text-hud-indigo transition-all hover:bg-hud-indigo hover:text-white hover:shadow-glow-indigo">
                         <Plus size={12} /> NOVO PARCELAMENTO
                     </button>
                 </div>
@@ -116,7 +116,7 @@ export default function InstallmentsTab({ onRefresh }) {
                         &gt; nenhum parcelamento registrado
                     </p>
                     <button onClick={() => { setEditingInstallment(null); setModal(true); }}
-                        className="btn-hud mt-4 border border-hud-purple bg-hud-purple/10 px-4 py-2 text-[11px] text-hud-purple transition-all hover:bg-hud-purple hover:text-white hover:shadow-glow-purple">
+                        className="btn-hud mt-4 border border-hud-indigo bg-hud-indigo/10 px-4 py-2 text-[11px] text-hud-indigo transition-all hover:bg-hud-indigo hover:text-white hover:shadow-glow-indigo">
                         REGISTRAR PRIMEIRO PARCELAMENTO
                     </button>
                 </div>
