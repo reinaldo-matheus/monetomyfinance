@@ -178,24 +178,7 @@ npm install --legacy-peer-deps
 npm start
 ```
 
-### Variáveis de ambiente
 
-**Backend `.env`**
-
-```env
-MONGO_URL=mongodb+srv://...
-DB_NAME=moneto_db
-JWT_SECRET=seu_secret
-FRONTEND_URL=http://localhost:3000
-```
-
-**Frontend `.env`**
-
-```env
-REACT_APP_BACKEND_URL=http://localhost:8000
-```
-
----
 
 ## 📸 Screenshots
 
