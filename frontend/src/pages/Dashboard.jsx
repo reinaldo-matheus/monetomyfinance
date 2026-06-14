@@ -7,7 +7,7 @@ import { motion } from "framer-motion";
 import CountUp from "react-countup";
 import {
   Zap, TrendingUp, TrendingDown, Wallet, Plus, LogOut, AlertTriangle, Clock,
-  Trash2, Download, Printer, Cloud, CloudOff, Check, Bell, Crosshair, Target, User
+  Trash2, Download, Printer, Cloud, CloudOff, Check, Bell, Crosshair, Target, User, Pencil
 } from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -20,6 +20,7 @@ import { useToast } from "@/context/ToastContext";
 import { BRL, formatDateBR, daysUntil, monthKey, monthLabelBR, CATEGORY_COLORS } from "@/lib/format";
 import { exportCSV, exportPDF } from "@/lib/exports";
 import TransactionModal from "@/components/modals/TransactionModal";
+import EditTransactionModal from "@/components/modals/EditTransactionModal";
 import GoalModal from "@/components/modals/GoalModal";
 import DepositModal from "@/components/modals/DepositModal";
 
@@ -35,6 +36,7 @@ export default function Dashboard() {
   const [filter, setFilter] = useState("todos");
   const [month, setMonth] = useState("todos");
   const [txModal, setTxModal] = useState(false);
+  const [editingTransaction, setEditingTransaction] = useState(null);
   const [goalModal, setGoalModal] = useState(false);
   const [depositGoal, setDepositGoal] = useState(null);
   const [bills, setBills] = useState([]);
@@ -113,6 +115,14 @@ export default function Dashboard() {
     setSyncing(true);
     try { const r = await api.post("/transactions", data); setTransactions((p) => [r.data, ...p]); show("ENTRADA REGISTRADA"); }
     catch { show("Erro ao adicionar transação", "error"); } finally { setSyncing(false); }
+  };
+  const updateTransaction = async (id, data) => {
+    setSyncing(true);
+    try {
+      const r = await api.put(`/transactions/${id}`, data);
+      setTransactions((p) => p.map((t) => (t.id === id ? r.data : t)));
+      show("ENTRADA ATUALIZADA");
+    } catch { show("Erro ao atualizar transação", "error"); } finally { setSyncing(false); }
   };
   const deleteTransaction = async (id) => {
     setSyncing(true);
@@ -280,7 +290,7 @@ export default function Dashboard() {
             <ListaTab
               loading={loading} transactions={filteredTransactions}
               filter={filter} setFilter={setFilter} month={month} setMonth={setMonth}
-              months={availableMonths} onDelete={deleteTransaction}
+              months={availableMonths} onDelete={deleteTransaction} onEdit={setEditingTransaction}
             />
           )}
           {tab === "graficos" && (
@@ -295,6 +305,13 @@ export default function Dashboard() {
       </main>
 
       <TransactionModal open={txModal} onClose={() => setTxModal(false)} onSubmit={addTransaction} profileType={profileType} />
+      <EditTransactionModal
+        open={!!editingTransaction}
+        onClose={() => setEditingTransaction(null)}
+        onSubmit={updateTransaction}
+        transaction={editingTransaction}
+        profileType={profileType}
+      />
       <GoalModal open={goalModal} onClose={() => setGoalModal(false)} onSubmit={addGoal} />
       <DepositModal open={!!depositGoal} goal={depositGoal} onClose={() => setDepositGoal(null)} onSubmit={depositGoalAction} />
       <ProfileModal open={profileModal} onClose={() => setProfileModal(false)} bills={bills} installments={installments} />
@@ -339,7 +356,6 @@ function SummaryCard({ label, value, icon, color, glowKey, loading, testid }) {
       <span className="hud-bracket bl" style={{ borderColor: color }} />
       <span className="hud-bracket br" style={{ borderColor: color }} />
       <div className="scan-line" />
-
       <div className="mb-4 flex items-center justify-between">
         <span className="label-hud" style={{ color }}>{label}</span>
         <span className="flex h-7 w-7 items-center justify-center border" style={{ borderColor: color, color }}>{icon}</span>
@@ -356,7 +372,7 @@ function SummaryCard({ label, value, icon, color, glowKey, loading, testid }) {
   );
 }
 
-function ListaTab({ loading, transactions, filter, setFilter, month, setMonth, months, onDelete }) {
+function ListaTab({ loading, transactions, filter, setFilter, month, setMonth, months, onDelete, onEdit }) {
   return (
     <div className="relative border border-hud-border bg-hud-surface">
       <span className="hud-bracket tl" /><span className="hud-bracket tr" /><span className="hud-bracket bl" /><span className="hud-bracket br" />
@@ -439,10 +455,17 @@ function ListaTab({ loading, transactions, filter, setFilter, month, setMonth, m
                     {t.type === "receita" ? "+" : "−"}{BRL(t.value)}
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <button
-                      data-testid={`delete-transaction-${t.id}`} onClick={() => onDelete(t.id)}
-                      className="border border-hud-border p-1.5 text-hud-muted transition-all hover:border-hud-pink hover:text-hud-pink hover:shadow-glow-pink"
-                    ><Trash2 size={12} /></button>
+                    <div className="flex items-center justify-end gap-1.5">
+                      <button
+                        onClick={() => onEdit(t)}
+                        title="Editar"
+                        className="border border-hud-border p-1.5 text-hud-muted transition-all hover:border-hud-yellow hover:text-hud-yellow"
+                      ><Pencil size={12} /></button>
+                      <button
+                        data-testid={`delete-transaction-${t.id}`} onClick={() => onDelete(t.id)}
+                        className="border border-hud-border p-1.5 text-hud-muted transition-all hover:border-hud-pink hover:text-hud-pink hover:shadow-glow-pink"
+                      ><Trash2 size={12} /></button>
+                    </div>
                   </td>
                 </tr>
               ))
