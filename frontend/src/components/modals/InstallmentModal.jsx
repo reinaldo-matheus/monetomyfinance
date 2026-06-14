@@ -170,7 +170,7 @@ export default function InstallmentModal({ open, onClose, onSubmit, editingInsta
                 <button type="submit" disabled={loading}
                     className={`btn-hud mt-2 flex w-full items-center justify-center gap-2 border px-6 py-3 text-xs transition-all disabled:opacity-50 ${isEditing
                         ? "border-hud-yellow bg-hud-yellow/10 text-hud-yellow hover:bg-hud-yellow hover:text-black"
-                        : "border-hud-purple bg-hud-purple/10 text-hud-purple hover:bg-hud-purple hover:text-white hover:shadow-glow-purple"
+                        : "border-hud-indigo bg-hud-indigo/10 text-hud-indigo hover:bg-hud-indigo hover:text-white hover:shadow-glow-indigo"
                         }`}>
                     {loading ? "SALVANDO..." : isEditing ? "SALVAR ALTERAÇÕES" : "REGISTRAR PARCELAMENTO"}
                 </button>

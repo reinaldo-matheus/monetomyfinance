@@ -100,7 +100,7 @@ export default function TransactionModal({ open, onClose, onSubmit, profileType 
         {/* Badge modo ativo */}
         <div className="flex items-center gap-2 font-mono-hud text-[10px] uppercase tracking-widest text-hud-muted">
           <span>// modo:</span>
-          <span className={`border px-2 py-0.5 font-bold ${profileType === "pj" ? "border-hud-purple text-hud-purple" : "border-hud-cyan text-hud-cyan"}`}>
+          <span className={`border px-2 py-0.5 font-bold ${profileType === "pj" ? "border-hud-indigo text-hud-indigo" : "border-hud-cyan text-hud-cyan"}`}>
             {profileType === "pj" ? "🏢 pessoa jurídica" : "👤 pessoa física"}
           </span>
         </div>
