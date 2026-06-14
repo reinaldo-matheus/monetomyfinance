@@ -149,17 +149,20 @@ export default function Dashboard() {
     <div className="relative min-h-screen bg-hud-bg text-hud-text">
       <div className="pointer-events-none fixed inset-0 bg-hud-grid opacity-30" />
       <div className="pointer-events-none fixed inset-0 bg-scanlines opacity-20" />
+      {profileType === "pj" && (
+        <div className="pointer-events-none fixed inset-0 transition-opacity duration-500" style={{ background: "radial-gradient(ellipse at top, rgba(91,95,255,0.07) 0%, transparent 70%)" }} />
+      )}
 
       {/* Header */}
-      <header className="sticky top-0 z-30 border-b border-hud-border bg-hud-bg/90 backdrop-blur-md">
+      <header className={`sticky top-0 z-30 border-b bg-hud-bg/90 backdrop-blur-md transition-colors duration-300 ${profileType === "pj" ? "border-hud-indigo/40" : "border-hud-border"}`}>
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6">
           <div className="flex items-center gap-3">
-            <div className="relative flex h-9 w-9 items-center justify-center border border-hud-cyan">
+            <div className={`relative flex h-9 w-9 items-center justify-center border transition-colors duration-300 ${profileType === "pj" ? "border-hud-indigo" : "border-hud-cyan"}`}>
               <span className="hud-bracket tl" /><span className="hud-bracket tr" /><span className="hud-bracket bl" /><span className="hud-bracket br" />
-              <Zap size={16} className="text-hud-cyan" />
+              <Zap size={16} className={`transition-colors duration-300 ${profileType === "pj" ? "text-hud-indigo" : "text-hud-cyan"}`} />
             </div>
             <div>
-              <div className="font-display text-xl font-bold tracking-[0.3em] text-hud-cyan glow-cyan-text">MONETO</div>
+              <div className={`font-display text-xl font-bold tracking-[0.3em] transition-colors duration-300 ${profileType === "pj" ? "text-hud-indigo" : "text-hud-cyan glow-cyan-text"}`}>MONETO</div>
               <div className="label-hud mt-0.5">// command.center</div>
             </div>
           </div>
