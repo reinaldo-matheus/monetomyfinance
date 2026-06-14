@@ -66,10 +66,10 @@ export default function EditTransactionModal({ open, onClose, onSubmit, transact
                                 key={t} type="button"
                                 onClick={() => switchType(t)}
                                 className={`btn-hud flex-1 px-4 py-2.5 text-xs transition-all ${isActive
-                                        ? t === "receita"
-                                            ? "bg-hud-green text-black shadow-glow-green"
-                                            : "bg-hud-pink text-white shadow-glow-pink"
-                                        : "text-hud-muted hover:text-hud-cyan"
+                                    ? t === "receita"
+                                        ? "bg-hud-green text-black shadow-glow-green"
+                                        : "bg-hud-pink text-white shadow-glow-pink"
+                                    : "text-hud-muted hover:text-hud-cyan"
                                     }`}
                             >
                                 {t === "receita" ? "+ LOOT" : "− BURN"}
@@ -127,8 +127,8 @@ export default function EditTransactionModal({ open, onClose, onSubmit, transact
                 <div className="flex items-center gap-2 font-mono-hud text-[10px] uppercase tracking-widest text-hud-muted">
                     <span>// modo:</span>
                     <span className={`border px-2 py-0.5 font-bold ${profileType === "pj"
-                            ? "border-hud-purple text-hud-purple"
-                            : "border-hud-cyan text-hud-cyan"
+                        ? "border-hud-purple text-hud-purple"
+                        : "border-hud-cyan text-hud-cyan"
                         }`}>
                         {profileType === "pj" ? "🏢 pessoa jurídica" : "👤 pessoa física"}
                     </span>
