@@ -86,15 +86,12 @@ class TransactionCreate(BaseModel):
     category: str
     date: str  # YYYY-MM-DD
 
-class Transaction(BaseModel):
-    id: str
-    user_id: str
-    type: str
-    description: str
-    value: float
-    category: str
-    date: str
-    created_at: datetime
+class TransactionUpdate(BaseModel):
+    type: Optional[Literal["receita", "despesa"]] = None
+    description: Optional[str] = Field(None, min_length=1)
+    value: Optional[float] = Field(None, gt=0)
+    category: Optional[str] = None
+    date: Optional[str] = None
 
 class GoalCreate(BaseModel):
     name: str
@@ -247,6 +244,22 @@ async def create_transaction(body: TransactionCreate, user: dict = Depends(get_c
     await db.transactions.insert_one(doc)
     doc.pop("_id", None)
     return doc
+
+@api_router.put("/transactions/{tx_id}")
+async def update_transaction(tx_id: str, body: TransactionUpdate, user: dict = Depends(get_current_user)):
+    update_data = {k: v for k, v in body.model_dump().items() if v is not None}
+    if not update_data:
+        raise HTTPException(status_code=400, detail="Nenhum campo para atualizar.")
+    if "value" in update_data:
+        update_data["value"] = float(update_data["value"])
+    r = await db.transactions.update_one(
+        {"id": tx_id, "user_id": user["id"]},
+        {"$set": update_data},
+    )
+    if r.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Transação não encontrada.")
+    updated = await db.transactions.find_one({"id": tx_id}, {"_id": 0})
+    return updated
 
 @api_router.delete("/transactions/{tx_id}")
 async def delete_transaction(tx_id: str, user: dict = Depends(get_current_user)):
